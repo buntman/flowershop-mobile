@@ -2,6 +2,7 @@ import 'package:flowershop/pages/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 
 class RegisterPage extends StatefulWidget {
@@ -21,29 +22,47 @@ class _RegisterPageState extends State<RegisterPage> {
 
     final response = await http.post(
       url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"email": email.text, "password": password.text, "password_confirmation": confirmPassword.text}),
+      headers: {
+        HttpHeaders.contentTypeHeader: 'application/json',
+        HttpHeaders.acceptHeader: 'application/json',
+      },
+      body: jsonEncode({
+        "email": email.text,
+        "password": password.text,
+        "password_confirmation": confirmPassword.text,
+      }),
     );
 
-    final data = jsonDecode(response.body);
-    if (data["success"] == true) {
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             "${data["message"]}",
-            style: TextStyle(color: Colors.white),
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              fontWeight: FontWeight.w300,
+              color: Colors.white,
+            ),
           ),
           backgroundColor: Colors.green,
         ),
       );
-      Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()),);
-    } else if (data["success"] == false) {
-      //temporary validations
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
+      );
+    } else if (response.statusCode == 422) {
+      final data = jsonDecode(response.body);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${data["errors"]["email"] ?? ""}\n${data["errors"]["password"] ?? ""}\n${data["errors"]["confirm_password"] ?? ""}',
-            style: TextStyle(color: Colors.white),
+            '${data["message"] ?? ""}',
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              fontWeight: FontWeight.w300,
+              color: Colors.white,
+            ),
           ),
           backgroundColor: Colors.red,
         ),
@@ -57,16 +76,16 @@ class _RegisterPageState extends State<RegisterPage> {
       backgroundColor: Color.fromRGBO(255, 255, 255, 1),
       body: Column(
         children: [
-          Padding(padding: EdgeInsets.only(top: 80.0)),
+          Padding(padding: EdgeInsets.only(top: 50.0)),
           Text(
-            "Rizza's Flowershop",
+            "Flowershop",
             style: GoogleFonts.poppins(
               fontSize: 32,
               fontWeight: FontWeight.w600,
               color: const Color.fromARGB(255, 190, 54, 165),
             ),
           ),
-          Padding(padding: EdgeInsets.only(top: 20, bottom: 20)),
+          Padding(padding: EdgeInsets.only(top: 10, bottom: 10)),
           Text(
             "Register",
             style: GoogleFonts.poppins(
@@ -74,7 +93,7 @@ class _RegisterPageState extends State<RegisterPage> {
               fontWeight: FontWeight.w600,
             ),
           ),
-          Padding(padding: EdgeInsets.only(top: 40)),
+          Padding(padding: EdgeInsets.only(top: 30)),
           Row(
             children: <Widget>[
               Padding(padding: EdgeInsets.only(left: 50)),
@@ -165,8 +184,8 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
           Padding(padding: EdgeInsets.only(top: 20)),
           ElevatedButton(
-            onPressed: () {
-              register();
+            onPressed: () async {
+              await register();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Color.fromRGBO(224, 6, 98, .47),

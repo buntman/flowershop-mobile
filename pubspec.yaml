@@ -68,23 +68,6 @@ flutter:
 
   assets:
       - lib/assets/images/Frame1.png
-      - lib/assets/images/redrose.png
-      - lib/assets/images/whiterose.png
-      - lib/assets/images/blankcard.png
-      - lib/assets/images/craft.png
-      - lib/assets/images/daffodil.png
-      - lib/assets/images/pinkboq.png
-      - lib/assets/images/rainbowrose.png
-      - lib/assets/images/redlily.png
-      - lib/assets/images/redrose.png
-      - lib/assets/images/smallboq.png
-      - lib/assets/images/smallvase.png
-      - lib/assets/images/transparent.png
-      - lib/assets/images/tulip.png
-      - lib/assets/images/tulipboq.png
-      - lib/assets/images/tycard.png
-      - lib/assets/images/white-rose.png
-      - lib/assets/images/yellowboq.png
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

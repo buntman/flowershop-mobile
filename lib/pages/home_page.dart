@@ -18,23 +18,16 @@ class HomePage extends StatefulWidget {
 
 class Bouquet {
   final String name;
-  final String description;
   final double price;
-  final String imagePath;
+  final String image;
 
-  const Bouquet({
-    required this.name,
-    required this.description,
-    required this.price,
-    required this.imagePath,
-  });
+  const Bouquet({required this.name, required this.price, required this.image});
 
   factory Bouquet.fromJson(Map<String, dynamic> json) {
     return Bouquet(
       name: json['name']?.toString() ?? 'Unknown',
-      description: json['description']?.toString() ?? '',
       price: double.tryParse(json['price']?.toString() ?? '0') ?? 0.0,
-      imagePath: json['image_path']?.toString() ?? '',
+      image: json['image_name']?.toString() ?? '',
     );
   }
 }
@@ -51,8 +44,11 @@ class _HomePageState extends State<HomePage> {
   Future<void> fetchBouquets() async {
     final token = await Token.getToken();
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8080/api/home'),
-      headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
+      Uri.parse('http://10.0.2.2:8000/api/home'),
+      headers: {
+        HttpHeaders.authorizationHeader: 'Bearer $token',
+        HttpHeaders.acceptHeader: 'application/json',
+      },
     );
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body);
@@ -107,10 +103,7 @@ class _HomePageState extends State<HomePage> {
         unselectedItemColor: Colors.grey, // Unselected item color
         onTap: _onItemTapped, // Handle tap
         items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: "Home",
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(
             icon: Icon(Icons.grid_view),
             label: "Gallery",
@@ -119,10 +112,7 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.shopping_cart),
             label: "Checkout",
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list_alt),
-            label: "Orders",
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: "Orders"),
         ],
       ),
       body: ListView(
@@ -282,10 +272,7 @@ class _HomePageState extends State<HomePage> {
                       SizedBox(
                         width: 100, // Set the size you want
                         height: 100,
-                        child: Image.network(
-                          bouquet.imagePath,
-                          fit: BoxFit.cover,
-                        ),
+                        child: Image.network(bouquet.image, fit: BoxFit.cover),
                       ),
                       SizedBox(width: 10), // Spacing between image and content
                       Expanded(
@@ -301,7 +288,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                             Padding(padding: EdgeInsets.only(top: 8)),
                             Text(
-                              bouquet.description,
+                              'It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters,',
                               style: GoogleFonts.inter(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w300,
@@ -325,53 +312,6 @@ class _HomePageState extends State<HomePage> {
             },
           ),
           Padding(padding: EdgeInsets.only(top: 10)),
-          Row(
-            children: [
-              Text(
-                "Gallery",
-                style: GoogleFonts.inter(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                ),
-              ),
-              Padding(padding: EdgeInsets.only(left: 210)),
-              TextButton(
-                onPressed:
-                    () => {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => GalleryPage()),
-                      ),
-                    },
-                child: Text(
-                  "view all",
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              SizedBox(
-                width: 150,
-                child: Image.network(
-                  'http://10.0.2.2:8080/images/inventory-items/sweetbouquet.jpg',
-                ),
-              ),
-              SizedBox(width: 40),
-              SizedBox(
-                width: 150,
-                child: Image.network(
-                  'http://10.0.2.2:8080/images/inventory-items/lavenderbouquet.jpg',
-                ),
-              ),
-            ],
-          ),
         ],
       ),
     );
