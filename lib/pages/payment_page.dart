@@ -2,7 +2,7 @@ import 'package:flowershop/pages/cart_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:flowershop/pages/confirm_page.dart';
+import 'package:flowershop/pages/order_page.dart';
 import 'package:flowershop/pages/temporary_storage.dart';
 
 class PaymentPage extends StatefulWidget {
@@ -13,7 +13,7 @@ class PaymentPage extends StatefulWidget {
 }
 
 class _PaymentPageState extends State<PaymentPage> {
-  String _selectedPayment = 'Pay In-Person';
+  String _selectedPayment = 'Online';
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
 
@@ -129,7 +129,7 @@ class _PaymentPageState extends State<PaymentPage> {
             ),
             ListTile(
               title: Text(
-                'Pay In-Person',
+                'Online',
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -140,29 +140,7 @@ class _PaymentPageState extends State<PaymentPage> {
                 fillColor: WidgetStateColor.resolveWith(
                   (states) => Color.fromRGBO(250, 34, 144, 1),
                 ),
-                value: 'Pay In-Person',
-                groupValue: _selectedPayment,
-                onChanged: (value) {
-                  setState(() {
-                    _selectedPayment = value.toString();
-                  });
-                },
-              ),
-            ),
-            ListTile(
-              title: Text(
-                'GCash',
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              leading: Radio(
-                activeColor: Color.fromRGBO(250, 34, 144, 1),
-                fillColor: WidgetStateColor.resolveWith(
-                  (states) => Color.fromRGBO(250, 34, 144, 1),
-                ),
-                value: 'GCash',
+                value: 'online',
                 groupValue: _selectedPayment,
                 onChanged: (value) {
                   setState(() {
@@ -212,7 +190,7 @@ class _PaymentPageState extends State<PaymentPage> {
                 await TemporaryStorage.storePickupTime(_selectedTime!);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ConfirmPage()),
+                  MaterialPageRoute(builder: (context) => OrderPage()),
                 );
               },
               style: ElevatedButton.styleFrom(

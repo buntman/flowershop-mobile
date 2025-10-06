@@ -16,46 +16,57 @@ class CartPage extends StatefulWidget {
 }
 
 class CartItems {
-  final int cartId;
+  final int cartItemId;
   final String imagePath;
   final String name;
-  final double price;
   int quantity;
+  final double price;
 
   CartItems({
-    required this.cartId,
+    required this.cartItemId,
     required this.imagePath,
     required this.name,
-    required this.price,
     required this.quantity,
+    required this.price,
   });
 
   factory CartItems.fromJson(Map<String, dynamic> json) {
     return CartItems(
-      cartId: json['cart_id'],
-      imagePath: json['image_path']?.toString() ?? '',
-      name: json['product_name']?.toString() ?? 'Unknown',
-      price: double.tryParse(json['price']?.toString() ?? '0') ?? 0.0,
+      cartItemId: json['id'],
+      imagePath: json['image_name']?.toString() ?? '',
+      name: json['name']?.toString() ?? 'Unknown',
       quantity: int.tryParse(json['quantity']?.toString() ?? '') ?? 1,
+      price: double.tryParse(json['price']?.toString() ?? '0') ?? 0.0,
     );
   }
 }
 
 class _CartPageState extends State<CartPage> {
+  bool _isLoading = true;
   List<CartItems> cartItems = [];
 
   @override
   void initState() {
     super.initState();
-    fetchCartItems();
-    fetchTotalPrice();
+    _initializeCart();
   }
 
-  Future<void> fetchCartItems() async {
+  Future<void> _initializeCart() async {
+    await _fetchCartItems();
+    await _fetchTotalPrice();
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _fetchCartItems() async {
     final token = await Token.getToken();
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8080/api/cart'),
-      headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
+      Uri.parse('http://10.0.2.2:8000/api/cart/items'),
+      headers: {
+        HttpHeaders.authorizationHeader: 'Bearer $token',
+        HttpHeaders.acceptHeader: 'application/json',
+      },
     );
 
     if (response.statusCode == 200) {
@@ -68,68 +79,79 @@ class _CartPageState extends State<CartPage> {
     }
   }
 
-  Future<void> deleteCartItem(CartItems item) async {
-    final token = await Token.getToken();
-    final response = await http.post(
-      Uri.parse('http://10.0.2.2:8080/api/cart/delete'),
-      headers: {
-        HttpHeaders.authorizationHeader: 'Bearer $token',
-        HttpHeaders.contentTypeHeader: 'application/json',
-      },
-      body: jsonEncode({"cart_id": item.cartId}),
-    );
-  }
-
-  Future<void> updateItemQuantity(CartItems item) async {
-    final token = await Token.getToken();
-    final response = await http.post(
-      Uri.parse('http://10.0.2.2:8080/api/cart/update-quantity'),
-      headers: {
-        HttpHeaders.authorizationHeader: 'Bearer $token',
-        HttpHeaders.contentTypeHeader: 'application/json',
-      },
-      body: jsonEncode({"cart_id": item.cartId, "quantity": item.quantity}),
-    );
-  }
-
-  Future<double> fetchTotalPrice() async {
+  Future<double> _fetchTotalPrice() async {
     final token = await Token.getToken();
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8080/api/cart/total-price'),
-      headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
+      Uri.parse('http://10.0.2.2:8000/api/cart/total'),
+      headers: {
+        HttpHeaders.authorizationHeader: 'Bearer $token',
+        HttpHeaders.acceptHeader: 'application/json',
+      },
     );
-    final data = jsonDecode(response.body);
     if (response.statusCode == 200) {
-      return double.tryParse(data['total_price'].toString()) ?? 0;
+      final data = jsonDecode(response.body);
+      return double.tryParse(data['total'].toString()) ?? 0;
     } else {
       throw Exception('Failed to fetch price');
     }
   }
 
-  Future<void> isUserDetailsUpdated() async {
+  Future<void> _deleteCartItem(CartItems item) async {
     final token = await Token.getToken();
-    final response = await http.get(
-      Uri.parse('http://10.0.2.2:8080/api/profile/details'),
+    final response = await http.delete(
+      Uri.parse('http://10.0.2.2:8000/api/cart/items/${item.cartItemId}'),
       headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
     );
-    final data = jsonDecode(response.body);
     if (response.statusCode == 200) {
-      if (data['success'] == false) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              data['message'],
-              style: TextStyle(color: Colors.white),
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
-      } else {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => PaymentPage()),
-        );
-      }
+      final data = jsonDecode(response.body);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(data['message'], style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      throw Exception('Failed to delete item');
+    }
+  }
+
+  Future<void> _updateItemQuantity(CartItems item) async {
+    final token = await Token.getToken();
+    final response = await http.patch(
+      Uri.parse('http://10.0.2.2:8000/api/cart/items/${item.cartItemId}'),
+      headers: {
+        HttpHeaders.authorizationHeader: 'Bearer $token',
+        HttpHeaders.contentTypeHeader: 'application/json',
+      },
+      body: jsonEncode({"quantity": item.quantity}),
+    );
+  }
+
+  Future<void> _isUserDetailsUpdated() async {
+    final token = await Token.getToken();
+    final response = await http.get(
+      Uri.parse('http://10.0.2.2:8000/api/profile?details=complete'),
+      headers: {
+        HttpHeaders.authorizationHeader: 'Bearer $token',
+        HttpHeaders.acceptHeader: 'application/json',
+      },
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to fetch details');
+    }
+    final data = jsonDecode(response.body);
+    if (data['success'] == false) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(data['message'], style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } else if (data['success'] == true) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => PaymentPage()),
+      );
     }
   }
 
@@ -165,7 +187,9 @@ class _CartPageState extends State<CartPage> {
         ],
       ),
       body:
-          cartItems.isEmpty
+          _isLoading
+              ? Center(child: CircularProgressIndicator())
+              : cartItems.isEmpty
               ? Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -247,7 +271,7 @@ class _CartPageState extends State<CartPage> {
                                   height: 100,
                                   child: Image.network(
                                     item.imagePath,
-                                    fit: BoxFit.fitHeight,
+                                    fit: BoxFit.cover,
                                   ),
                                 ),
                               ),
@@ -279,7 +303,7 @@ class _CartPageState extends State<CartPage> {
                                       setState(() {
                                         if (item.quantity > 1) {
                                           item.quantity--;
-                                          updateItemQuantity(item);
+                                          _updateItemQuantity(item);
                                         }
                                       });
                                     },
@@ -293,7 +317,7 @@ class _CartPageState extends State<CartPage> {
                                     onPressed: () {
                                       setState(() {
                                         item.quantity++;
-                                        updateItemQuantity(item);
+                                        _updateItemQuantity(item);
                                       });
                                     },
                                   ),
@@ -303,7 +327,7 @@ class _CartPageState extends State<CartPage> {
                                     onPressed: () {
                                       setState(() {
                                         cartItems.remove(item);
-                                        deleteCartItem(item);
+                                        _deleteCartItem(item);
                                       });
                                     },
                                   ),
@@ -324,7 +348,7 @@ class _CartPageState extends State<CartPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             FutureBuilder(
-                              future: fetchTotalPrice(),
+                              future: _fetchTotalPrice(),
                               builder: (context, snapshot) {
                                 return Column(
                                   children: [
@@ -359,7 +383,7 @@ class _CartPageState extends State<CartPage> {
                                 ),
                               ),
                               onPressed: () async {
-                                await isUserDetailsUpdated();
+                                await _isUserDetailsUpdated();
                               },
                               child: Text(
                                 "Place an order",

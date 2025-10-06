@@ -39,15 +39,23 @@ class Bouquet {
 }
 
 class _GalleryPagestate extends State<GalleryPage> {
+  bool _isLoading = true;
   List<Bouquet> bouquets = [];
 
   @override
   void initState() {
     super.initState();
-    fetchBouquets();
+    _initializeGallery();
   }
 
-  Future<void> fetchBouquets() async {
+  Future<void> _initializeGallery() async {
+    await _fetchBouquets();
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _fetchBouquets() async {
     final token = await Token.getToken();
     final response = await http.get(
       Uri.parse('http://10.0.2.2:8000/api/gallery'),
@@ -63,15 +71,16 @@ class _GalleryPagestate extends State<GalleryPage> {
     }
   }
 
-  Future<void> addBouquetToCart(Bouquet bouquet) async {
+  Future<void> _addBouquetToCart(Bouquet bouquet) async {
     final token = await Token.getToken();
     final response = await http.post(
-      Uri.parse('http://10.0.2.2:8000/api/cart/add/${bouquet.id}'),
+      Uri.parse('http://10.0.2.2:8000/api/cart/items'),
       headers: {
         HttpHeaders.authorizationHeader: 'Bearer $token',
         HttpHeaders.contentTypeHeader: 'application/json',
         HttpHeaders.acceptHeader: 'application/json',
       },
+      body: jsonEncode({"product_id": bouquet.id}),
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -175,176 +184,208 @@ class _GalleryPagestate extends State<GalleryPage> {
           ),
         ],
       ),
-      body: Padding(
-        padding: EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Gallery',
-                  style: GoogleFonts.inter(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Row(
+      body:
+          _isLoading
+              ? Center(child: CircularProgressIndicator())
+              : Padding(
+                padding: EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      width: 60,
-                      height: 30,
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color.fromRGBO(255, 255, 255, 1),
-                          side: BorderSide(width: 1, color: Colors.grey),
-                          padding: EdgeInsets.symmetric(
-                            vertical: 1,
-                            horizontal: 4,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                        child: Text(
-                          "sort by",
-                          style: GoogleFonts.inter(
-                            fontWeight: FontWeight.w400,
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Padding(padding: EdgeInsets.only(left: 5)),
-                    SizedBox(
-                      width: 60,
-                      height: 30,
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color.fromRGBO(255, 255, 255, 1),
-                          side: BorderSide(width: 1, color: Colors.grey),
-                          padding: EdgeInsets.symmetric(
-                            vertical: 1,
-                            horizontal: 4,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                        child: Text(
-                          "filter",
-                          style: GoogleFonts.inter(
-                            fontWeight: FontWeight.w400,
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Padding(padding: EdgeInsets.only(right: 10)),
-                  ],
-                ),
-              ],
-            ),
-            Padding(padding: EdgeInsets.only(bottom: 10)),
-            Expanded(
-              child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  childAspectRatio: 0.7,
-                ),
-                itemCount: bouquets.length,
-                itemBuilder: (context, index) {
-                  final bouquet = bouquets[index];
-                  return Card(
-                    margin: EdgeInsets.zero,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch, // see #2
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Expanded(
-                          child: AspectRatio(
-                            aspectRatio:
-                                1, // 1 = square, or use 3/2, 16/9, etc. for rectangle
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(10),
-                              ),
-                              child: Image.network(
-                                bouquet.image,
-                                fit:
-                                    BoxFit
-                                        .cover, // Fill the box while maintaining aspect
-                              ),
-                            ),
+                        Text(
+                          'Gallery',
+                          style: GoogleFonts.inter(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Padding(
-                          padding: EdgeInsets.all(8),
-                          child: Column(
-                            children: [
-                              Text(
-                                bouquet.name,
-                                style: GoogleFonts.inter(
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              SizedBox(height: 5),
-                              Text(
-                                '₱${bouquet.price.toStringAsFixed(2)}',
-                                style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(height: 5),
-                              OutlinedButton(
-                                style: OutlinedButton.styleFrom(
-                                  side: const BorderSide(
-                                    color: Color.fromRGBO(190, 54, 165, 1),
-                                    width: 2,
+                        Row(
+                          children: [
+                            SizedBox(
+                              width: 60,
+                              height: 30,
+                              child: ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Color.fromRGBO(
+                                    255,
+                                    255,
+                                    255,
+                                    1,
                                   ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
+                                  side: BorderSide(
+                                    width: 1,
+                                    color: Colors.grey,
                                   ),
                                   padding: EdgeInsets.symmetric(
-                                    vertical: 10,
-                                    horizontal: 30,
+                                    vertical: 1,
+                                    horizontal: 4,
                                   ),
-                                  minimumSize: Size(30, 5),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
                                 ),
-                                onPressed: () {
-                                  addBouquetToCart(bouquet);
-                                },
                                 child: Text(
-                                  'Add to Cart',
-                                  style: GoogleFonts.averiaSerifLibre(
-                                    color: Color.fromRGBO(190, 54, 165, 1),
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w300,
+                                  "sort by",
+                                  style: GoogleFonts.inter(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 14,
+                                    color: Colors.grey,
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                            Padding(padding: EdgeInsets.only(left: 5)),
+                            SizedBox(
+                              width: 60,
+                              height: 30,
+                              child: ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Color.fromRGBO(
+                                    255,
+                                    255,
+                                    255,
+                                    1,
+                                  ),
+                                  side: BorderSide(
+                                    width: 1,
+                                    color: Colors.grey,
+                                  ),
+                                  padding: EdgeInsets.symmetric(
+                                    vertical: 1,
+                                    horizontal: 4,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
+                                child: Text(
+                                  "filter",
+                                  style: GoogleFonts.inter(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 14,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Padding(padding: EdgeInsets.only(right: 10)),
+                          ],
                         ),
                       ],
                     ),
-                  );
-                },
+                    Padding(padding: EdgeInsets.only(bottom: 10)),
+                    Expanded(
+                      child: GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                          childAspectRatio: 0.7,
+                        ),
+                        itemCount: bouquets.length,
+                        itemBuilder: (context, index) {
+                          final bouquet = bouquets[index];
+                          return Card(
+                            margin: EdgeInsets.zero,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Column(
+                              crossAxisAlignment:
+                                  CrossAxisAlignment.stretch, // see #2
+                              children: [
+                                Expanded(
+                                  child: AspectRatio(
+                                    aspectRatio:
+                                        1, // 1 = square, or use 3/2, 16/9, etc. for rectangle
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.vertical(
+                                        top: Radius.circular(10),
+                                      ),
+                                      child: Image.network(
+                                        bouquet.image,
+                                        fit:
+                                            BoxFit
+                                                .cover, // Fill the box while maintaining aspect
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.all(8),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        bouquet.name,
+                                        style: GoogleFonts.inter(
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      SizedBox(height: 5),
+                                      Text(
+                                        '₱${bouquet.price.toStringAsFixed(2)}',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      SizedBox(height: 5),
+                                      OutlinedButton(
+                                        style: OutlinedButton.styleFrom(
+                                          side: const BorderSide(
+                                            color: Color.fromRGBO(
+                                              190,
+                                              54,
+                                              165,
+                                              1,
+                                            ),
+                                            width: 2,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              20,
+                                            ),
+                                          ),
+                                          padding: EdgeInsets.symmetric(
+                                            vertical: 10,
+                                            horizontal: 30,
+                                          ),
+                                          minimumSize: Size(30, 5),
+                                        ),
+                                        onPressed: () {
+                                          _addBouquetToCart(bouquet);
+                                        },
+                                        child: Text(
+                                          'Add to Cart',
+                                          style: GoogleFonts.averiaSerifLibre(
+                                            color: Color.fromRGBO(
+                                              190,
+                                              54,
+                                              165,
+                                              1,
+                                            ),
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w300,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

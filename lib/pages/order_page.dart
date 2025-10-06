@@ -1,7 +1,7 @@
+import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flowershop/pages/home_page.dart';
-import 'package:flowershop/pages/payment_page.dart';
 import 'package:flowershop/pages/temporary_storage.dart';
 import 'package:flowershop/pages/token_storage.dart';
 import 'package:http/http.dart' as http;
@@ -9,29 +9,32 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:webview_flutter/webview_flutter.dart';
 
-class ConfirmPage extends StatefulWidget {
-  const ConfirmPage({super.key, DateTime? date, TimeOfDay? time});
+class OrderPage extends StatefulWidget {
+  const OrderPage({super.key, DateTime? date, TimeOfDay? time});
 
   @override
-  State<ConfirmPage> createState() => _ConfirmPageState();
+  State<OrderPage> createState() => _OrderPageState();
 }
 
 class ItemsToCheckOut {
-  final int quantity;
+  final int productId;
   final String name;
-  final double subprice;
+  final int quantity;
+  final double subTotal;
 
   ItemsToCheckOut({
-    required this.quantity,
+    required this.productId,
     required this.name,
-    required this.subprice,
+    required this.quantity,
+    required this.subTotal,
   });
 
   factory ItemsToCheckOut.fromJson(Map<String, dynamic> json) {
     return ItemsToCheckOut(
+      productId: json['id'],
+      name: json['name']?.toString() ?? '',
       quantity: int.tryParse(json['quantity']?.toString() ?? '') ?? 0,
-      name: json['product_name']?.toString() ?? '',
-      subprice: double.tryParse(json['subprice']?.toString() ?? '0') ?? 0.0,
+      subTotal: double.tryParse(json['sub_total']?.toString() ?? '0') ?? 0.0,
     );
   }
 
@@ -94,50 +97,69 @@ class _PaymentWebViewState extends State<PaymentWebView> {
   }
 }
 
-class _ConfirmPageState extends State<ConfirmPage> {
+class _OrderPageState extends State<OrderPage> {
   List<ItemsToCheckOut> items = [];
   String? _paymentOption;
   String? _pickupDate;
   String? _pickupTime;
-  double totalPrice = 0;
+  double? totalPrice = 0;
+  int? cartId;
 
   @override
   void initState() {
     super.initState();
-    fetchPaymentAndSchedule();
-    fetchItems();
-    fetchTotalPrice();
+    _initializeOrder();
   }
 
-  Future<void> fetchItems() async {
+  Future<void> _initializeOrder() async {
+    await _fetchPaymentAndSchedule();
+    await _fetchItems();
+    await _fetchTotalPrice();
+  }
+
+  Future<void> _fetchItems() async {
     final token = await Token.getToken();
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8080/api/order'),
-      headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
+      Uri.parse('http://10.0.2.2:8000/api/cart/items/checkout'),
+      headers: {
+        HttpHeaders.authorizationHeader: 'Bearer $token',
+        HttpHeaders.acceptHeader: 'application/json',
+      },
     );
     if (response.statusCode == 200) {
-      final List<dynamic> jsonData = json.decode(response.body);
+      final Map<String, dynamic> jsonData = json.decode(response.body);
       setState(() {
-        items = jsonData.map((item) => ItemsToCheckOut.fromJson(item)).toList();
+        cartId = jsonData['cart_id'];
+        items =
+            (jsonData['items'] as List)
+                .map((item) => ItemsToCheckOut.fromJson(item))
+                .toList();
       });
+    } else {
+      throw Exception('Failed to load order');
     }
   }
 
-  Future<void> fetchTotalPrice() async {
+  Future<void> _fetchTotalPrice() async {
     final token = await Token.getToken();
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8080/api/cart/total-price'),
-      headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
+      Uri.parse('http://10.0.2.2:8000/api/cart/total'),
+      headers: {
+        HttpHeaders.authorizationHeader: 'Bearer $token',
+        HttpHeaders.acceptHeader: 'application/json',
+      },
     );
-    final data = jsonDecode(response.body);
     if (response.statusCode == 200) {
-      totalPrice = double.tryParse(data['total_price'].toString()) ?? 0;
+      final data = jsonDecode(response.body);
+      setState(() {
+        totalPrice = double.tryParse(data['total'].toString()) ?? 0;
+      });
     } else {
-      throw Exception('Failed to fetch price');
+      throw Exception('Failed to fetch total price');
     }
   }
 
-  Future<void> fetchPaymentAndSchedule() async {
+  Future<void> _fetchPaymentAndSchedule() async {
     String? payment = await TemporaryStorage.getPaymentOption();
     String? date = await TemporaryStorage.getPickupDate();
     String? time = await TemporaryStorage.getPickupTime();
@@ -148,10 +170,10 @@ class _ConfirmPageState extends State<ConfirmPage> {
     });
   }
 
-  Future<void> updateCartStatus() async {
+  Future<void> _updateCartStatus() async {
     final token = await Token.getToken();
-    final response = await http.post(
-      Uri.parse('http://10.0.2.2:8080/api/cart/status'),
+    final response = await http.patch(
+      Uri.parse('http://10.0.2.2:8000/api/cart/$cartId'),
       headers: {
         HttpHeaders.authorizationHeader: 'Bearer $token',
         HttpHeaders.contentTypeHeader: 'application/json',
@@ -160,48 +182,44 @@ class _ConfirmPageState extends State<ConfirmPage> {
     );
   }
 
-  Future<String?> sendOrderDetails() async {
+  Future<String?> _sendOrderDetails() async {
     final token = await Token.getToken();
     final response = await http.post(
-      Uri.parse('http://10.0.2.2:8080/api/order'),
+      Uri.parse('http://10.0.2.2:8000/api/order'),
       headers: {
         HttpHeaders.authorizationHeader: 'Bearer $token',
         HttpHeaders.contentTypeHeader: 'application/json',
       },
       body: jsonEncode({
         "payment_method": _paymentOption,
-        "total_price": totalPrice,
         "pickup_date": _pickupDate,
         "pickup_time": _pickupTime,
-        "items": items.map((e) => e.toJson()).toList(),
+        "total": totalPrice,
+        "order_items": items.map((e) => e.toJson()).toList(),
       }),
     );
-    final data = jsonDecode(response.body);
-
-    if (data["success"] == true) {
-      if (data.containsKey('checkout_url')) {
-        return data['checkout_url'];
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              data['message'],
-              style: TextStyle(color: Colors.white),
-            ),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => HomePage()),
-      );
-    } else {
+    if (response.statusCode != 200) {
+      final data = jsonDecode(response.body);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(data['message'], style: TextStyle(color: Colors.white)),
           backgroundColor: Colors.red,
         ),
+      );
+    }
+    final data = jsonDecode(response.body);
+    if (data.containsKey('checkout_url')) {
+      return data['checkout_url'];
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(data['message'], style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
       );
     }
     return null;
@@ -225,11 +243,20 @@ class _ConfirmPageState extends State<ConfirmPage> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () async {
-            await TemporaryStorage.removeData();
-            Navigator.push(
+            if (await confirm(
               context,
-              MaterialPageRoute(builder: (context) => PaymentPage()),
-            );
+              content: const Text(
+                'The edited content will be discarded, do you still want to exit?',
+              ),
+              textOK: const Text('Yes'),
+              textCancel: const Text('No'),
+            )) {
+              await TemporaryStorage.removeData();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => HomePage()),
+              );
+            }
           },
         ),
       ),
@@ -358,7 +385,7 @@ class _ConfirmPageState extends State<ConfirmPage> {
                               ),
                               Spacer(),
                               Text(
-                                '₱${item.subprice.toStringAsFixed(2)}',
+                                '₱${item.subTotal.toStringAsFixed(2)}',
                                 style: GoogleFonts.inter(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
@@ -382,7 +409,7 @@ class _ConfirmPageState extends State<ConfirmPage> {
               ),
             ),
             Text(
-              '₱${totalPrice.toStringAsFixed(2)}',
+              '₱$totalPrice',
               style: GoogleFonts.inter(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -391,12 +418,12 @@ class _ConfirmPageState extends State<ConfirmPage> {
             Padding(padding: EdgeInsets.only(top: 15)),
             ElevatedButton(
               onPressed: () async {
-                await updateCartStatus();
-                String? url = await sendOrderDetails();
+                String? url = await _sendOrderDetails();
+                await _updateCartStatus();
                 await TemporaryStorage.removeData();
 
                 if (url != null) {
-                  // Payment method is GCash, open the WebView for checkout
+                  // Payment method is Online, open the WebView for checkout
                   Navigator.push(
                     context,
                     MaterialPageRoute(

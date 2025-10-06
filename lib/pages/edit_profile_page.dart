@@ -20,14 +20,21 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   void initState() {
     super.initState();
-    fetchCurrentDetails();
+    initializeEditProfile();
+  }
+
+  Future<void> initializeEditProfile() async {
+    await fetchCurrentDetails();
   }
 
   Future<void> fetchCurrentDetails() async {
     final token = await Token.getToken();
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8080/api/profile'),
-      headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
+      Uri.parse('http://10.0.2.2:8000/api/profile'),
+      headers: {
+        HttpHeaders.authorizationHeader: 'Bearer $token',
+        HttpHeaders.acceptHeader: 'application/json',
+      },
     );
 
     if (response.statusCode == 200) {
@@ -39,11 +46,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   Future<void> editProfile() async {
     final token = await Token.getToken();
-    final response = await http.post(
-      Uri.parse('http://10.0.2.2:8080/api/profile/edit'),
+    final response = await http.patch(
+      Uri.parse('http://10.0.2.2:8000/api/profile'),
       headers: {
         HttpHeaders.authorizationHeader: 'Bearer $token',
         HttpHeaders.contentTypeHeader: 'application/json',
+        HttpHeaders.acceptHeader: 'application/json',
       },
       body: jsonEncode({
         "name": name.text,
@@ -52,31 +60,24 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      if (data['success'] == false) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              data['message']['error'],
-              style: TextStyle(color: Colors.white),
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
-      } else if (data['success'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              data['message'],
-              style: TextStyle(color: Colors.white),
-            ),
-            backgroundColor: Colors.green,
-          ),
-        );
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => ProfilePage()),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(data['message'], style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ProfilePage()),
+      );
+    } else if (response.statusCode == 422) {
+      final data = jsonDecode(response.body);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(data['message'], style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 

@@ -47,14 +47,21 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    fetchUserDetails();
+    _initializeProfile();
   }
 
-  Future<void> fetchUserDetails() async {
+  Future<void> _initializeProfile() async {
+    await _fetchUserDetails();
+  }
+
+  Future<void> _fetchUserDetails() async {
     final token = await Token.getToken();
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8080/api/profile'),
-      headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
+      Uri.parse('http://10.0.2.2:8000/api/profile'),
+      headers: {
+        HttpHeaders.authorizationHeader: 'Bearer $token',
+        HttpHeaders.acceptHeader: 'application/json',
+      },
     );
 
     if (response.statusCode == 200) {
@@ -63,7 +70,7 @@ class _ProfilePageState extends State<ProfilePage> {
         user = UserInfo.fromJson(jsonData);
       });
     } else {
-      throw Exception('Failed to user');
+      throw Exception('Failed to fetch user details');
     }
   }
 
@@ -98,8 +105,7 @@ class _ProfilePageState extends State<ProfilePage> {
           children: [
             IconButton(
               icon: Icon(Icons.person, color: Colors.black, size: 180),
-              onPressed: () {
-              },
+              onPressed: () {},
             ),
             Container(
               margin: EdgeInsets.only(right: 30),

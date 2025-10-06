@@ -38,10 +38,14 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    fetchBouquets();
+    _initializeHome();
   }
 
-  Future<void> fetchBouquets() async {
+  Future<void> _initializeHome() async {
+    await _fetchBouquets();
+  }
+
+  Future<void> _fetchBouquets() async {
     final token = await Token.getToken();
     final response = await http.get(
       Uri.parse('http://10.0.2.2:8000/api/home'),

@@ -17,7 +17,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController password = TextEditingController();
   final TextEditingController confirmPassword = TextEditingController();
 
-  Future<void> register() async {
+  Future<void> _register() async {
     final url = Uri.parse("http://10.0.2.2:8000/api/register");
 
     final response = await http.post(
@@ -185,7 +185,7 @@ class _RegisterPageState extends State<RegisterPage> {
           Padding(padding: EdgeInsets.only(top: 20)),
           ElevatedButton(
             onPressed: () async {
-              await register();
+              await _register();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Color.fromRGBO(224, 6, 98, .47),
