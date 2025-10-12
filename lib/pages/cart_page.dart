@@ -1,7 +1,7 @@
 import 'package:flowershop/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flowershop/pages/payment_page.dart';
+import 'package:flowershop/pages/order_page.dart';
 import 'package:flowershop/pages/gallery_page.dart';
 import 'package:flowershop/pages/token_storage.dart';
 import 'dart:convert';
@@ -150,7 +150,7 @@ class _CartPageState extends State<CartPage> {
     } else if (data['success'] == true) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => PaymentPage()),
+        MaterialPageRoute(builder: (context) => OrderPage()),
       );
     }
   }
@@ -281,15 +281,15 @@ class _CartPageState extends State<CartPage> {
                                   Text(
                                     item.name,
                                     style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                   Text(
                                     '₱${item.price.toStringAsFixed(2)}',
                                     style: TextStyle(
                                       fontSize: 14,
-                                      fontWeight: FontWeight.w500,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ],
@@ -310,7 +310,7 @@ class _CartPageState extends State<CartPage> {
                                   ),
                                   Text(
                                     '${item.quantity}',
-                                    style: TextStyle(fontSize: 18),
+                                    style: TextStyle(fontSize: 14),
                                   ),
                                   IconButton(
                                     icon: Icon(Icons.add),
@@ -351,18 +351,19 @@ class _CartPageState extends State<CartPage> {
                               future: _fetchTotalPrice(),
                               builder: (context, snapshot) {
                                 return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      "Total price",
+                                      "Total",
                                       style: GoogleFonts.inter(
                                         fontSize: 12,
-                                        fontWeight: FontWeight.w400,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                     Text(
                                       '${snapshot.data}',
                                       style: GoogleFonts.inter(
-                                        fontSize: 16,
+                                        fontSize: 14,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.black,
                                       ),
@@ -372,6 +373,9 @@ class _CartPageState extends State<CartPage> {
                               },
                             ),
                             ElevatedButton(
+                              onPressed: () async {
+                                await _isUserDetailsUpdated();
+                              },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.pink,
                                 padding: EdgeInsets.symmetric(
@@ -382,11 +386,8 @@ class _CartPageState extends State<CartPage> {
                                   borderRadius: BorderRadius.circular(5),
                                 ),
                               ),
-                              onPressed: () async {
-                                await _isUserDetailsUpdated();
-                              },
                               child: Text(
-                                "Place an order",
+                                "Check out",
                                 style: GoogleFonts.poppins(
                                   fontSize: 16,
                                   color: Colors.white,
