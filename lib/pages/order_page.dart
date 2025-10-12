@@ -156,7 +156,7 @@ class _OrderPageState extends State<OrderPage> {
         user = UserInfo.fromJson(jsonData);
       });
     } else {
-      throw Exception('Failed to fetch user details');
+      throw Exception('HTTP ${response.statusCode}');
     }
   }
 
@@ -179,7 +179,7 @@ class _OrderPageState extends State<OrderPage> {
                 .toList();
       });
     } else {
-      throw Exception('Failed to load order');
+      throw Exception('HTTP ${response.statusCode}');
     }
   }
 
@@ -198,7 +198,7 @@ class _OrderPageState extends State<OrderPage> {
         totalPrice = double.tryParse(data['total'].toString()) ?? 0;
       });
     } else {
-      throw Exception('Failed to fetch total price');
+      throw Exception('Failed to load order');
     }
   }
 

@@ -98,6 +98,8 @@ class _GalleryPagestate extends State<GalleryPage> {
           backgroundColor: Colors.red,
         ),
       );
+    } else {
+      throw Exception('HTTP ${response.statusCode}');
     }
   }
 

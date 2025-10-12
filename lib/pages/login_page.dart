@@ -18,7 +18,6 @@ class _LoginPageState extends State<LoginPage> {
   bool rememberme = false;
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
-  String message = '';
 
   Future<void> login() async {
     final url = Uri.parse("http://10.0.2.2:8000/api/login");
@@ -37,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            "Successful Login",
+            '${data["message"] ?? ""}',
             style: GoogleFonts.poppins(
               fontSize: 14,
               fontWeight: FontWeight.w300,
@@ -48,14 +47,12 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
       await Token.storeToken(data["token"]);
-      final token = await Token.getToken();
-      print('Token: $token');
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => HomePage()),
       );
     } else if (response.statusCode == 422) {
-        final data = jsonDecode(response.body);
+      final data = jsonDecode(response.body);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -69,6 +66,8 @@ class _LoginPageState extends State<LoginPage> {
           backgroundColor: Colors.red,
         ),
       );
+    } else {
+      throw Exception('HTTP ${response.statusCode}');
     }
   }
 

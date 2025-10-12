@@ -41,6 +41,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
       final data = jsonDecode(response.body);
       name.text = data['name'] ?? '';
       contactNumber.text = data['contact_number'] ?? '';
+    } else {
+      throw Exception('HTTP ${response.statusCode}');
     }
   }
 
@@ -78,6 +80,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
           backgroundColor: Colors.red,
         ),
       );
+    } else {
+      throw Exception('HTTP ${response.statusCode}');
     }
   }
 

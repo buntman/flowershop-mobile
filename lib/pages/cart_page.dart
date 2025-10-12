@@ -75,7 +75,7 @@ class _CartPageState extends State<CartPage> {
         cartItems = jsonData.map((item) => CartItems.fromJson(item)).toList();
       });
     } else {
-      throw Exception('Failed to load items');
+      throw Exception('HTTP ${response.statusCode}'); // ✅ Specific
     }
   }
 
@@ -92,7 +92,7 @@ class _CartPageState extends State<CartPage> {
       final data = jsonDecode(response.body);
       return double.tryParse(data['total'].toString()) ?? 0;
     } else {
-      throw Exception('Failed to fetch price');
+      throw Exception('HTTP ${response.statusCode}'); // ✅ Specific
     }
   }
 
@@ -111,7 +111,7 @@ class _CartPageState extends State<CartPage> {
         ),
       );
     } else {
-      throw Exception('Failed to delete item');
+      throw Exception('HTTP ${response.statusCode}'); // ✅ Specific
     }
   }
 
@@ -136,22 +136,28 @@ class _CartPageState extends State<CartPage> {
         HttpHeaders.acceptHeader: 'application/json',
       },
     );
-    if (response.statusCode != 200) {
-      throw Exception('Failed to fetch details');
-    }
     final data = jsonDecode(response.body);
-    if (data['success'] == false) {
+
+    if (response.statusCode == 200 && data['success'] == true) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => OrderPage()),
+      );
+      return;
+    }
+
+    if (response.statusCode == 422 && data['success'] == false) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(data['message'], style: TextStyle(color: Colors.white)),
           backgroundColor: Colors.red,
         ),
       );
-    } else if (data['success'] == true) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => OrderPage()),
-      );
+      return;
+    }
+
+    if (response.statusCode != 200) {
+      throw Exception('HTTP ${response.statusCode}');
     }
   }
 

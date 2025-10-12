@@ -70,7 +70,7 @@ class _ProfilePageState extends State<ProfilePage> {
         user = UserInfo.fromJson(jsonData);
       });
     } else {
-      throw Exception('Failed to fetch user details');
+      throw Exception('HTTP ${response.statusCode}');
     }
   }
 

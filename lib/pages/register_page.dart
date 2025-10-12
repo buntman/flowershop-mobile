@@ -67,6 +67,8 @@ class _RegisterPageState extends State<RegisterPage> {
           backgroundColor: Colors.red,
         ),
       );
+    } else {
+      throw Exception('HTTP${response.statusCode}');
     }
   }
 
