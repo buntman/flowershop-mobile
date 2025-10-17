@@ -30,7 +30,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Future<void> fetchCurrentDetails() async {
     final token = await Token.getToken();
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8000/api/profile'),
+      Uri.parse('http://127.0.0.1:8000/api/profile'),
       headers: {
         HttpHeaders.authorizationHeader: 'Bearer $token',
         HttpHeaders.acceptHeader: 'application/json',
@@ -49,7 +49,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Future<void> editProfile() async {
     final token = await Token.getToken();
     final response = await http.patch(
-      Uri.parse('http://10.0.2.2:8000/api/profile'),
+      Uri.parse('http://127.0.0.1:8000/api/profile'),
       headers: {
         HttpHeaders.authorizationHeader: 'Bearer $token',
         HttpHeaders.contentTypeHeader: 'application/json',
@@ -65,6 +65,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(data['message'], style: TextStyle(color: Colors.white)),
+          duration: Duration(seconds: 2),
           backgroundColor: Colors.green,
         ),
       );
@@ -77,6 +78,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(data['message'], style: TextStyle(color: Colors.white)),
+          duration: Duration(seconds: 2),
           backgroundColor: Colors.red,
         ),
       );

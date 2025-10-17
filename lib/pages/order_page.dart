@@ -94,7 +94,10 @@ class _PaymentWebViewState extends State<PaymentWebView> {
               },
               onWebResourceError: (error) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error: ${error.description}')),
+                  SnackBar(
+                    content: Text('Error: ${error.description}'),
+                    duration: Duration(seconds: 2),
+                  ),
                 );
               },
             ),
@@ -143,7 +146,7 @@ class _OrderPageState extends State<OrderPage> {
   Future<void> _fetchUserDetails() async {
     final token = await Token.getToken();
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8000/api/profile'),
+      Uri.parse('http://127.0.0.1:8000/api/profile'),
       headers: {
         HttpHeaders.authorizationHeader: 'Bearer $token',
         HttpHeaders.acceptHeader: 'application/json',
@@ -163,7 +166,7 @@ class _OrderPageState extends State<OrderPage> {
   Future<void> _fetchItems() async {
     final token = await Token.getToken();
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8000/api/cart/items/checkout'),
+      Uri.parse('http://127.0.0.1:8000/api/cart/items/checkout'),
       headers: {
         HttpHeaders.authorizationHeader: 'Bearer $token',
         HttpHeaders.acceptHeader: 'application/json',
@@ -186,7 +189,7 @@ class _OrderPageState extends State<OrderPage> {
   Future<void> _fetchTotalPrice() async {
     final token = await Token.getToken();
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8000/api/cart/total'),
+      Uri.parse('http://127.0.0.1:8000/api/cart/total'),
       headers: {
         HttpHeaders.authorizationHeader: 'Bearer $token',
         HttpHeaders.acceptHeader: 'application/json',
@@ -205,7 +208,7 @@ class _OrderPageState extends State<OrderPage> {
   Future<void> _updateCartStatus() async {
     final token = await Token.getToken();
     final response = await http.patch(
-      Uri.parse('http://10.0.2.2:8000/api/cart/$cartId'),
+      Uri.parse('http://127.0.0.1:8000/api/cart/$cartId'),
       headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
     );
   }
@@ -213,7 +216,7 @@ class _OrderPageState extends State<OrderPage> {
   Future<String?> _sendOrderDetails() async {
     final token = await Token.getToken();
     final response = await http.post(
-      Uri.parse('http://10.0.2.2:8000/api/order'),
+      Uri.parse('http://127.0.0.1:8000/api/order'),
       headers: {
         HttpHeaders.authorizationHeader: 'Bearer $token',
         HttpHeaders.contentTypeHeader: 'application/json',
@@ -229,6 +232,7 @@ class _OrderPageState extends State<OrderPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(data['message'], style: TextStyle(color: Colors.white)),
+          duration: Duration(seconds: 2),
           backgroundColor: Colors.red,
         ),
       );
@@ -241,6 +245,7 @@ class _OrderPageState extends State<OrderPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(data['message'], style: TextStyle(color: Colors.white)),
+          duration: Duration(seconds: 2),
           backgroundColor: Colors.green,
         ),
       );

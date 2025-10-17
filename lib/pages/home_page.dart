@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flowershop/pages/cart_page.dart';
 import 'package:flowershop/pages/gallery_page.dart';
 import 'package:flowershop/pages/profile_page.dart';
-import 'package:flowershop/pages/history_page.dart';
+import 'package:flowershop/pages/orders_list_page.dart';
 import 'package:flowershop/pages/token_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
@@ -48,7 +48,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _fetchBouquets() async {
     final token = await Token.getToken();
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8000/api/home'),
+      Uri.parse('http://127.0.0.1:8000/api/home'),
       headers: {
         HttpHeaders.authorizationHeader: 'Bearer $token',
         HttpHeaders.acceptHeader: 'application/json',
@@ -69,29 +69,29 @@ class _HomePageState extends State<HomePage> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      switch (_selectedIndex) {
-        case 0:
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => HomePage()),
-          );
-        case 1:
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => GalleryPage()),
-          );
-        case 2:
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => CartPage()),
-          );
-        case 3:
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => HistoryPage()),
-          );
-      }
     });
+    switch (_selectedIndex) {
+      case 0:
+        break;
+      case 1:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => GalleryPage()),
+        );
+        break;
+      case 2:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => OrdersListPage()),
+        );
+        break;
+      case 3:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ProfilePage()),
+        );
+        break;
+    }
   }
 
   final TextEditingController searchbar = TextEditingController();
@@ -113,210 +113,117 @@ class _HomePageState extends State<HomePage> {
             label: "Gallery",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: "Checkout",
+            icon: Icon(Icons.receipt_long),
+            label: "Orders",
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: "Orders"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Me"),
         ],
       ),
-      body: ListView(
-        padding: EdgeInsets.all(20),
-        children: [
-          Row(
-            children: [
-              Text(
-                "Rizza FlowerShop",
-                style: GoogleFonts.dancingScript(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 28,
-                  color: Color.fromRGBO(190, 54, 165, 1),
-                ),
-              ),
-              Padding(padding: EdgeInsets.only(left: 120)),
-              IconButton(
-                onPressed:
-                    () => {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => ProfilePage()),
-                      ),
-                    },
-                icon: Icon(Icons.person, color: Colors.pink, size: 40),
-              ),
-            ],
-          ),
-          Padding(padding: EdgeInsets.only(top: 30)),
-          Text(
-            "Shop Our Best",
-            style: GoogleFonts.merriweather(
-              fontWeight: FontWeight.bold,
-              fontSize: 40,
-            ),
-          ),
-          Text(
-            "Sellers",
-            style: GoogleFonts.merriweather(
-              fontWeight: FontWeight.bold,
-              fontSize: 40,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(top: 10),
-            child: TextField(
-              controller: searchbar,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(width: 1, color: Colors.grey),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                prefixIcon: Icon(Icons.search),
-                filled: true,
-                hintText: "what do you want to find?",
-                hintStyle: GoogleFonts.inter(
-                  fontWeight: FontWeight.normal,
-                  fontSize: 16,
-                ),
-                fillColor: Color.fromRGBO(255, 255, 255, 1),
-              ),
-            ),
-          ),
-          Padding(padding: EdgeInsets.only(top: 40)),
-          Text(
-            "Event Categories",
-            style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          Padding(padding: EdgeInsets.only(top: 10)),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
+      body: SafeArea(
+        child: ListView(
+          padding: EdgeInsets.all(20),
+          children: [
+            Row(
               children: [
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromRGBO(255, 255, 255, 1),
-                    side: BorderSide(width: 1, color: Colors.grey),
-                    fixedSize: Size(95, 40),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+                Text(
+                  "Rizza FlowerShop",
+                  style: GoogleFonts.dancingScript(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 28,
+                    color: Color.fromRGBO(190, 54, 165, 1),
                   ),
-                  child: Text("Text"),
                 ),
-                Padding(padding: EdgeInsets.only(left: 10)),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromRGBO(255, 255, 255, 1),
-                    side: BorderSide(width: 1, color: Colors.grey),
-                    fixedSize: Size(95, 40),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                  child: Text("Text"),
+                Padding(padding: EdgeInsets.only(left: 85)),
+                IconButton(
+                  onPressed:
+                      () => {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => CartPage()),
+                        ),
+                      },
+                  icon: Icon(Icons.shopping_cart, size: 32),
                 ),
-                Padding(padding: EdgeInsets.only(left: 10)),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromRGBO(255, 255, 255, 1),
-                    side: BorderSide(width: 1, color: Colors.grey),
-                    fixedSize: Size(95, 40),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                  child: Text("Text"),
-                ),
-                Padding(padding: EdgeInsets.only(left: 10)),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromRGBO(255, 255, 255, 1),
-                    side: BorderSide(width: 1, color: Colors.grey),
-                    fixedSize: Size(95, 40),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                  child: Text("Text"),
-                ),
-                Padding(padding: EdgeInsets.only(left: 10)),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromRGBO(255, 255, 255, 1),
-                    side: BorderSide(width: 1, color: Colors.grey),
-                    fixedSize: Size(95, 40),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                  child: Text("Text"),
-                ),
-                Padding(padding: EdgeInsets.only(left: 10)),
               ],
             ),
-          ),
-          Padding(padding: EdgeInsets.only(top: 10)),
-          Row(children: [Image.asset("lib/assets/images/Frame1.png")]),
-          Padding(padding: EdgeInsets.only(top: 10)),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: bouquets.length,
-            itemBuilder: (context, index) {
-              final bouquet = bouquets[index];
-              return Card(
-                elevation: 0,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 100, // Set the size you want
-                        height: 100,
-                        child: Image.network(bouquet.image, fit: BoxFit.cover),
-                      ),
-                      SizedBox(width: 10), // Spacing between image and content
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              bouquet.name,
-                              style: GoogleFonts.inter(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Padding(padding: EdgeInsets.only(top: 8)),
-                            Text(
-                              'It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters,',
-                              style: GoogleFonts.inter(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w300,
-                              ),
-                            ),
-                            Padding(padding: EdgeInsets.only(top: 3)),
-                            Text(
-                              '₱${bouquet.price.toStringAsFixed(2)}',
-                              style: GoogleFonts.inter(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ],
+            Padding(padding: EdgeInsets.only(top: 30)),
+            Text(
+              "Shop Our Best",
+              style: GoogleFonts.merriweather(
+                fontWeight: FontWeight.bold,
+                fontSize: 40,
+              ),
+            ),
+            Text(
+              "Sellers",
+              style: GoogleFonts.merriweather(
+                fontWeight: FontWeight.bold,
+                fontSize: 40,
+              ),
+            ),
+            Padding(padding: EdgeInsets.only(top: 10)),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: bouquets.length,
+              itemBuilder: (context, index) {
+                final bouquet = bouquets[index];
+                return Card(
+                  elevation: 0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 100, // Set the size you want
+                          height: 100,
+                          child: Image.network(
+                            bouquet.image,
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                      ),
-                    ],
+                        SizedBox(
+                          width: 10,
+                        ), // Spacing between image and content
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                bouquet.name,
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Padding(padding: EdgeInsets.only(top: 8)),
+                              Text(
+                                'It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters,',
+                                style: GoogleFonts.inter(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w300,
+                                ),
+                              ),
+                              Padding(padding: EdgeInsets.only(top: 3)),
+                              Text(
+                                '₱${bouquet.price.toStringAsFixed(2)}',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-          Padding(padding: EdgeInsets.only(top: 10)),
-        ],
+                );
+              },
+            ),
+            Padding(padding: EdgeInsets.only(top: 10)),
+          ],
+        ),
       ),
     );
   }

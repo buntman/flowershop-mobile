@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flowershop/pages/login_page.dart';
+import 'package:flowershop/pages/home_page.dart';
+import 'package:flowershop/pages/token_storage.dart';
 
-void main() {
-  runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final token = await Token.getToken();
+
+  runApp(MyApp(isLoggedIn: token != null));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isLoggedIn;
+  const MyApp({super.key, required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginPage(),
+      home: isLoggedIn ? const HomePage() : const LoginPage(),
     );
   }
-} 
+}

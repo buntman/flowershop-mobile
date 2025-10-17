@@ -57,7 +57,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _fetchUserDetails() async {
     final token = await Token.getToken();
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8000/api/profile'),
+      Uri.parse('http://127.0.0.1:8000/api/profile'),
       headers: {
         HttpHeaders.authorizationHeader: 'Bearer $token',
         HttpHeaders.acceptHeader: 'application/json',
@@ -90,13 +90,7 @@ class _ProfilePageState extends State<ProfilePage> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed:
-              () => {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => HomePage()),
-                ),
-              },
+          onPressed: () => {Navigator.pop(context)},
         ),
       ),
       body: Center(
@@ -240,9 +234,10 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               onPressed: () async {
                 await Token.removeToken();
-                Navigator.push(
+                Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => LoginPage()),
+                  (Route<dynamic> route) => false,
                 );
               },
               child: Text(

@@ -1,4 +1,3 @@
-import 'package:flowershop/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flowershop/pages/order_page.dart';
@@ -62,7 +61,7 @@ class _CartPageState extends State<CartPage> {
   Future<void> _fetchCartItems() async {
     final token = await Token.getToken();
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8000/api/cart/items'),
+      Uri.parse('http://127.0.0.1:8000/api/cart/items'),
       headers: {
         HttpHeaders.authorizationHeader: 'Bearer $token',
         HttpHeaders.acceptHeader: 'application/json',
@@ -82,7 +81,7 @@ class _CartPageState extends State<CartPage> {
   Future<double> _fetchTotalPrice() async {
     final token = await Token.getToken();
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8000/api/cart/total'),
+      Uri.parse('http://127.0.0.1:8000/api/cart/total'),
       headers: {
         HttpHeaders.authorizationHeader: 'Bearer $token',
         HttpHeaders.acceptHeader: 'application/json',
@@ -99,7 +98,7 @@ class _CartPageState extends State<CartPage> {
   Future<void> _deleteCartItem(CartItems item) async {
     final token = await Token.getToken();
     final response = await http.delete(
-      Uri.parse('http://10.0.2.2:8000/api/cart/items/${item.cartItemId}'),
+      Uri.parse('http://127.0.0.1:8000/api/cart/items/${item.cartItemId}'),
       headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
     );
     if (response.statusCode == 200) {
@@ -107,6 +106,7 @@ class _CartPageState extends State<CartPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(data['message'], style: TextStyle(color: Colors.white)),
+          duration: Duration(milliseconds: 500),
           backgroundColor: Colors.green,
         ),
       );
@@ -118,7 +118,7 @@ class _CartPageState extends State<CartPage> {
   Future<void> _updateItemQuantity(CartItems item) async {
     final token = await Token.getToken();
     final response = await http.patch(
-      Uri.parse('http://10.0.2.2:8000/api/cart/items/${item.cartItemId}'),
+      Uri.parse('http://127.0.0.1:8000/api/cart/items/${item.cartItemId}'),
       headers: {
         HttpHeaders.authorizationHeader: 'Bearer $token',
         HttpHeaders.contentTypeHeader: 'application/json',
@@ -130,7 +130,7 @@ class _CartPageState extends State<CartPage> {
   Future<void> _isUserDetailsUpdated() async {
     final token = await Token.getToken();
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8000/api/profile?details=complete'),
+      Uri.parse('http://127.0.0.1:8000/api/profile?details=complete'),
       headers: {
         HttpHeaders.authorizationHeader: 'Bearer $token',
         HttpHeaders.acceptHeader: 'application/json',
@@ -150,6 +150,7 @@ class _CartPageState extends State<CartPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(data['message'], style: TextStyle(color: Colors.white)),
+          duration: Duration(milliseconds: 500),
           backgroundColor: Colors.red,
         ),
       );
@@ -177,84 +178,77 @@ class _CartPageState extends State<CartPage> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed:
-              () => {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => HomePage()),
-                ),
-              },
+          onPressed: () => {Navigator.pop(context)},
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.shopping_cart, color: Colors.black),
-            onPressed: () {},
-          ),
-        ],
       ),
       body:
           _isLoading
               ? Center(child: CircularProgressIndicator())
               : cartItems.isEmpty
               ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        Icons.shopping_cart,
-                        color: Colors.black,
-                        size: 150,
-                      ),
-                      onPressed: () {},
-                    ),
-                    Text(
-                      "Your cart is empty",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    SizedBox(height: 3),
-                    SizedBox(
-                      width: 300,
-                      child: Text(
-                        "Looks like you have not added anything to your cart. Go ahead & explore the gallery!",
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.pink,
-                        padding: EdgeInsets.symmetric(
-                          vertical: 10,
-                          horizontal: 15,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    top: 60.0,
+                  ), // move down slightly from top
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          Icons.shopping_cart,
+                          color: Colors.black,
+                          size: 150,
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
+                        onPressed: () {},
                       ),
-                      onPressed:
-                          () => {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => GalleryPage(),
-                              ),
-                            ),
-                          },
-                      child: Text(
-                        "Shop Now",
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: Colors.white,
+                      Text(
+                        "Your cart is empty",
+                        style: TextStyle(
+                          fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ),
-                  ],
+                      SizedBox(height: 3),
+                      SizedBox(
+                        width: 300,
+                        child: Text(
+                          "Looks like you have not added anything to your cart. Go ahead & explore the gallery!",
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.pink,
+                          padding: EdgeInsets.symmetric(
+                            vertical: 10,
+                            horizontal: 15,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
+                        onPressed:
+                            () => {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => GalleryPage(),
+                                ),
+                              ),
+                            },
+                        child: Text(
+                          "Shop Now",
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               )
               : Column(

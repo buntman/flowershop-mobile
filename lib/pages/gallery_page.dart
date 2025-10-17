@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flowershop/pages/orders_list_page.dart';
+import 'package:flowershop/pages/profile_page.dart';
 import 'package:flowershop/pages/cart_page.dart';
-import 'package:flowershop/pages/home_page.dart';
-import 'package:flowershop/pages/history_page.dart';
 import 'package:flowershop/pages/token_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
@@ -58,7 +58,7 @@ class _GalleryPagestate extends State<GalleryPage> {
   Future<void> _fetchBouquets() async {
     final token = await Token.getToken();
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8000/api/gallery'),
+      Uri.parse('http://127.0.0.1:8000/api/gallery'),
       headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
     );
     if (response.statusCode == 200) {
@@ -74,7 +74,7 @@ class _GalleryPagestate extends State<GalleryPage> {
   Future<void> _addBouquetToCart(Bouquet bouquet) async {
     final token = await Token.getToken();
     final response = await http.post(
-      Uri.parse('http://10.0.2.2:8000/api/cart/items'),
+      Uri.parse('http://127.0.0.1:8000/api/cart/items'),
       headers: {
         HttpHeaders.authorizationHeader: 'Bearer $token',
         HttpHeaders.contentTypeHeader: 'application/json',
@@ -87,6 +87,7 @@ class _GalleryPagestate extends State<GalleryPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(data['message'], style: TextStyle(color: Colors.white)),
+          duration: Duration(milliseconds: 500),
           backgroundColor: Colors.green,
         ),
       );
@@ -95,6 +96,7 @@ class _GalleryPagestate extends State<GalleryPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(data['message'], style: TextStyle(color: Colors.white)),
+          duration: Duration(milliseconds: 500),
           backgroundColor: Colors.red,
         ),
       );
@@ -108,29 +110,23 @@ class _GalleryPagestate extends State<GalleryPage> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      switch (_selectedIndex) {
-        case 0:
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => HomePage()),
-          );
-        case 1:
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => GalleryPage()),
-          );
-        case 2:
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => CartPage()),
-          );
-        case 3:
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => HistoryPage()),
-          );
-      }
     });
+    switch (_selectedIndex) {
+      case 0:
+        Navigator.pop(context);
+      case 1:
+        break;
+      case 2:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => OrdersListPage()),
+        );
+      case 3:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => ProfilePage()),
+        );
+    }
   }
 
   @override
@@ -149,10 +145,10 @@ class _GalleryPagestate extends State<GalleryPage> {
             label: "Gallery",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: "Checkout",
+            icon: Icon(Icons.receipt_long),
+            label: "Orders",
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: "Orders"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Me"),
         ],
       ),
       appBar: AppBar(
@@ -161,10 +157,7 @@ class _GalleryPagestate extends State<GalleryPage> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => HomePage()),
-            );
+            Navigator.pop(context);
           },
         ),
         title: TextField(
@@ -181,8 +174,13 @@ class _GalleryPagestate extends State<GalleryPage> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.shopping_bag_outlined, color: Colors.black),
-            onPressed: () {},
+            icon: Icon(Icons.shopping_cart, size: 36),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CartPage()),
+              );
+            },
           ),
         ],
       ),
