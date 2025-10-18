@@ -78,18 +78,27 @@ class _HomePageState extends State<HomePage> {
           context,
           MaterialPageRoute(builder: (context) => GalleryPage()),
         );
+        setState(() {
+          _selectedIndex = 0;
+        });
         break;
       case 2:
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => OrdersListPage()),
         );
+        setState(() {
+          _selectedIndex = 0;
+        });
         break;
       case 3:
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => ProfilePage()),
         );
+        setState(() {
+          _selectedIndex = 0;
+        });
         break;
     }
   }

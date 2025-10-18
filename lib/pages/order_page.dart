@@ -283,10 +283,7 @@ class _OrderPageState extends State<OrderPage> {
               textOK: const Text('Yes'),
               textCancel: const Text('No'),
             )) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => HomePage()),
-              );
+                Navigator.pop(context);
             }
           },
         ),

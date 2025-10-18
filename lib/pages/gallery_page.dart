@@ -174,7 +174,7 @@ class _GalleryPagestate extends State<GalleryPage> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.shopping_cart, size: 36),
+            icon: Icon(Icons.shopping_cart, size: 32),
             onPressed: () {
               Navigator.push(
                 context,
