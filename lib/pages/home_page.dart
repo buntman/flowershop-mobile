@@ -133,6 +133,7 @@ class _HomePageState extends State<HomePage> {
           padding: EdgeInsets.all(20),
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   "Rizza FlowerShop",
@@ -142,7 +143,6 @@ class _HomePageState extends State<HomePage> {
                     color: Color.fromRGBO(190, 54, 165, 1),
                   ),
                 ),
-                Padding(padding: EdgeInsets.only(left: 85)),
                 IconButton(
                   onPressed:
                       () => {

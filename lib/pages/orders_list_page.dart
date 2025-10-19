@@ -80,7 +80,7 @@ class _OrdersListPageState extends State<OrdersListPage> {
   Future<void> fetchOrderDetails() async {
     final token = await Token.getToken();
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8080/api/order/details'),
+      Uri.parse('http://127.0.0.1:8000/api/order/details'),
       headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
     );
     if (response.statusCode == 200) {
@@ -125,7 +125,7 @@ class _OrdersListPageState extends State<OrdersListPage> {
   Future<void> updatePickedUpOrderStatus(Order order) async {
     final token = await Token.getToken();
     final response = await http.post(
-      Uri.parse('http://10.0.2.2:8080/api/order/status'),
+      Uri.parse('http://127.0.0.1:8000/api/order/status'),
       headers: {
         HttpHeaders.authorizationHeader: 'Bearer $token',
         HttpHeaders.contentTypeHeader: 'application/json',

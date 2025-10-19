@@ -180,19 +180,28 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
             Padding(padding: EdgeInsets.only(top: 20)),
-            ElevatedButton(
-              onPressed: () async {
-                await _register();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromRGBO(224, 6, 98, .47),
-                foregroundColor: Color.fromRGBO(33, 33, 33, 1),
-                minimumSize: Size(300, 50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        await _register();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color.fromRGBO(224, 6, 98, .47),
+                        foregroundColor: Color.fromRGBO(33, 33, 33, 1),
+                        minimumSize: Size(300, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: Text("Register", style: GoogleFonts.poppins()),
+                    ),
+                  ),
+                ],
               ),
-              child: Text("Register", style: GoogleFonts.poppins()),
             ),
             Padding(padding: EdgeInsets.only(top: 10)),
             Row(

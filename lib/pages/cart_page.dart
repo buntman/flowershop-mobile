@@ -6,6 +6,7 @@ import 'package:flowershop/pages/token_storage.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:io';
+import 'package:confirm_dialog/confirm_dialog.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -139,7 +140,7 @@ class _CartPageState extends State<CartPage> {
     final data = jsonDecode(response.body);
 
     if (response.statusCode == 200 && data['success'] == true) {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => OrderPage()),
       );
@@ -258,17 +259,23 @@ class _CartPageState extends State<CartPage> {
                       itemCount: cartItems.length,
                       itemBuilder: (context, index) {
                         var item = cartItems[index];
-                        return Column(
-                          children: [
-                            ListTile(
-                              minTileHeight: 120,
+                        return Card(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          elevation: 3,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.all(8),
                               leading: ClipRRect(
-                                borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(2),
-                                ),
-                                child: SizedBox(
-                                  width: 100,
-                                  height: 100,
+                                borderRadius: BorderRadius.circular(8),
+                                child: AspectRatio(
+                                  aspectRatio: 1,
                                   child: Image.network(
                                     item.imagePath,
                                     fit: BoxFit.cover,
@@ -280,14 +287,14 @@ class _CartPageState extends State<CartPage> {
                                 children: [
                                   Text(
                                     item.name,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w300,
                                     ),
                                   ),
                                   Text(
                                     '₱${item.price.toStringAsFixed(2)}',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -298,22 +305,38 @@ class _CartPageState extends State<CartPage> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   IconButton(
-                                    icon: Icon(Icons.remove),
-                                    onPressed: () {
-                                      setState(() {
-                                        if (item.quantity > 1) {
+                                    icon: const Icon(Icons.remove),
+                                    onPressed: () async {
+                                      if (item.quantity > 1) {
+                                        setState(() {
                                           item.quantity--;
                                           _updateItemQuantity(item);
-                                        }
+                                        });
+                                        return;
+                                      }
+                                      final confirmed = (await confirm(
+                                        context,
+                                        content: const Text(
+                                          'Do you want to remove this item?',
+                                        ),
+                                        textOK: const Text('Yes'),
+                                        textCancel: const Text('No'),
+                                      ));
+                                      if (!confirmed) {
+                                        return;
+                                      }
+                                      setState(() {
+                                        cartItems.remove(item);
+                                        _deleteCartItem(item);
                                       });
                                     },
                                   ),
                                   Text(
                                     '${item.quantity}',
-                                    style: TextStyle(fontSize: 14),
+                                    style: const TextStyle(fontSize: 14),
                                   ),
                                   IconButton(
-                                    icon: Icon(Icons.add),
+                                    icon: const Icon(Icons.add),
                                     onPressed: () {
                                       setState(() {
                                         item.quantity++;
@@ -322,7 +345,7 @@ class _CartPageState extends State<CartPage> {
                                     },
                                   ),
                                   IconButton(
-                                    icon: Icon(Icons.delete),
+                                    icon: const Icon(Icons.delete),
                                     color: Colors.red,
                                     onPressed: () {
                                       setState(() {
@@ -334,8 +357,7 @@ class _CartPageState extends State<CartPage> {
                                 ],
                               ),
                             ),
-                            Divider(),
-                          ],
+                          ),
                         );
                       },
                     ),

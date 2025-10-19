@@ -296,13 +296,11 @@ class _GalleryPagestate extends State<GalleryPage> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.stretch, // see #2
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 Expanded(
                                   child: AspectRatio(
-                                    aspectRatio:
-                                        1, // 1 = square, or use 3/2, 16/9, etc. for rectangle
+                                    aspectRatio: 1,
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.vertical(
                                         top: Radius.circular(10),
