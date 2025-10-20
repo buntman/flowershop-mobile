@@ -166,6 +166,7 @@ class _CartPageState extends State<CartPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
           "My Cart",
@@ -306,6 +307,7 @@ class _CartPageState extends State<CartPage> {
                                 children: [
                                   IconButton(
                                     icon: const Icon(Icons.remove),
+                                    iconSize: 16,
                                     onPressed: () async {
                                       if (item.quantity > 1) {
                                         setState(() {
@@ -331,12 +333,29 @@ class _CartPageState extends State<CartPage> {
                                       });
                                     },
                                   ),
-                                  Text(
-                                    '${item.quantity}',
-                                    style: const TextStyle(fontSize: 14),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(
+                                        6,
+                                      ), // Rounded corners
+                                    ),
+                                    child: Text(
+                                      '${item.quantity}',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black, // Text color
+                                      ),
+                                    ),
                                   ),
                                   IconButton(
                                     icon: const Icon(Icons.add),
+                                    iconSize: 16,
                                     onPressed: () {
                                       setState(() {
                                         item.quantity++;
@@ -344,15 +363,31 @@ class _CartPageState extends State<CartPage> {
                                       });
                                     },
                                   ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete),
-                                    color: Colors.red,
-                                    onPressed: () {
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      await _deleteCartItem(item);
                                       setState(() {
                                         cartItems.remove(item);
-                                        _deleteCartItem(item);
                                       });
                                     },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.pink,
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 4,
+                                        horizontal: 8,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(5),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      "Delete",
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
