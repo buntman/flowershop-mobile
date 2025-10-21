@@ -75,7 +75,7 @@ class _CartPageState extends State<CartPage> {
         cartItems = jsonData.map((item) => CartItems.fromJson(item)).toList();
       });
     } else {
-      throw Exception('HTTP ${response.statusCode}'); // ✅ Specific
+      throw Exception('HTTP ${response.statusCode}');
     }
   }
 
@@ -92,7 +92,7 @@ class _CartPageState extends State<CartPage> {
       final data = jsonDecode(response.body);
       return double.tryParse(data['total'].toString()) ?? 0;
     } else {
-      throw Exception('HTTP ${response.statusCode}'); // ✅ Specific
+      throw Exception('HTTP ${response.statusCode}');
     }
   }
 
@@ -112,7 +112,7 @@ class _CartPageState extends State<CartPage> {
         ),
       );
     } else {
-      throw Exception('HTTP ${response.statusCode}'); // ✅ Specific
+      throw Exception('HTTP ${response.statusCode}');
     }
   }
 
@@ -262,136 +262,185 @@ class _CartPageState extends State<CartPage> {
                         var item = cartItems[index];
                         return Card(
                           margin: const EdgeInsets.symmetric(
-                            horizontal: 10,
+                            horizontal: 8,
                             vertical: 6,
                           ),
                           elevation: 3,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: ListTile(
-                              contentPadding: const EdgeInsets.all(8),
-                              leading: ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: AspectRatio(
-                                  aspectRatio: 1,
-                                  child: Image.network(
-                                    item.imagePath,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                              title: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item.name,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w300,
-                                    ),
-                                  ),
-                                  Text(
-                                    '₱${item.price.toStringAsFixed(2)}',
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.remove),
-                                    iconSize: 16,
-                                    onPressed: () async {
-                                      if (item.quantity > 1) {
-                                        setState(() {
-                                          item.quantity--;
-                                          _updateItemQuantity(item);
-                                        });
-                                        return;
-                                      }
-                                      final confirmed = (await confirm(
-                                        context,
-                                        content: const Text(
-                                          'Do you want to remove this item?',
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final imageSize =
+                                  constraints.maxWidth *
+                                  0.25; // 25% of card width
+                              return Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: SizedBox(
+                                        width: imageSize,
+                                        height: imageSize,
+                                        child: Image.network(
+                                          item.imagePath,
+                                          fit: BoxFit.cover,
                                         ),
-                                        textOK: const Text('Yes'),
-                                        textCancel: const Text('No'),
-                                      ));
-                                      if (!confirmed) {
-                                        return;
-                                      }
-                                      setState(() {
-                                        cartItems.remove(item);
-                                        _deleteCartItem(item);
-                                      });
-                                    },
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(
-                                        6,
-                                      ), // Rounded corners
-                                    ),
-                                    child: Text(
-                                      '${item.quantity}',
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.black, // Text color
                                       ),
                                     ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.add),
-                                    iconSize: 16,
-                                    onPressed: () {
-                                      setState(() {
-                                        item.quantity++;
-                                        _updateItemQuantity(item);
-                                      });
-                                    },
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () async {
-                                      await _deleteCartItem(item);
-                                      setState(() {
-                                        cartItems.remove(item);
-                                      });
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.pink,
-                                      padding: EdgeInsets.symmetric(
-                                        vertical: 4,
-                                        horizontal: 8,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(5),
+
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          // Product name and price
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                item.name,
+                                                style: const TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 8),
+                                              Text(
+                                                '₱${item.price.toStringAsFixed(2)}',
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+
+                                          const SizedBox(height: 8),
+
+                                          // Quantity and buttons
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      Icons.remove,
+                                                    ),
+                                                    iconSize: 16,
+                                                    onPressed: () async {
+                                                      if (item.quantity > 1) {
+                                                        setState(() {
+                                                          item.quantity--;
+                                                          _updateItemQuantity(
+                                                            item,
+                                                          );
+                                                        });
+                                                        return;
+                                                      }
+                                                      final confirmed =
+                                                          await confirm(
+                                                            context,
+                                                            content: const Text(
+                                                              'Do you want to remove this item?',
+                                                            ),
+                                                            textOK: const Text(
+                                                              'Yes',
+                                                            ),
+                                                            textCancel:
+                                                                const Text(
+                                                                  'No',
+                                                                ),
+                                                          );
+                                                      if (!confirmed) return;
+                                                      setState(() {
+                                                        cartItems.remove(item);
+                                                        _deleteCartItem(item);
+                                                      });
+                                                    },
+                                                  ),
+                                                  Container(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          horizontal: 8,
+                                                          vertical: 4,
+                                                        ),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            6,
+                                                          ),
+                                                    ),
+                                                    child: Text(
+                                                      '${item.quantity}',
+                                                      style: const TextStyle(
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color: Colors.black,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  IconButton(
+                                                    icon: const Icon(Icons.add),
+                                                    iconSize: 16,
+                                                    onPressed: () {
+                                                      setState(() {
+                                                        item.quantity++;
+                                                        _updateItemQuantity(
+                                                          item,
+                                                        );
+                                                      });
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                              ElevatedButton(
+                                                onPressed: () async {
+                                                  await _deleteCartItem(item);
+                                                  setState(() {
+                                                    cartItems.remove(item);
+                                                  });
+                                                },
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Colors.pink,
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        vertical: 4,
+                                                        horizontal: 8,
+                                                      ),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          5,
+                                                        ),
+                                                  ),
+                                                ),
+                                                child: Text(
+                                                  "Delete",
+                                                  style: GoogleFonts.poppins(
+                                                    fontSize: 12,
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                    child: Text(
-                                      "Delete",
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 12,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                                  ],
+                                ),
+                              );
+                            },
                           ),
                         );
                       },
