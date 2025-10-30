@@ -13,20 +13,14 @@ class OrdersListPage extends StatefulWidget {
 }
 
 class Order {
-  final String orderId;
+  final int orderId;
   final double totalPrice;
-  final String pickupDate;
-  final String pickupTime;
-  final String paymentMethod;
   String status;
   final List<OrderItem> items;
 
   Order({
     required this.orderId,
     required this.totalPrice,
-    required this.pickupDate,
-    required this.pickupTime,
-    required this.paymentMethod,
     required this.status,
     required this.items,
   });
@@ -34,11 +28,7 @@ class Order {
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
       orderId: json['id'],
-      totalPrice:
-          double.tryParse(json['total_price']?.toString() ?? '0') ?? 0.0,
-      pickupDate: json['pickup_date']?.toString() ?? '',
-      pickupTime: json['pickup_time']?.toString() ?? '',
-      paymentMethod: json['payment_method']?.toString() ?? '',
+      totalPrice: double.tryParse(json['total']?.toString() ?? '0') ?? 0.0,
       status: json['status']?.toString() ?? '',
       items:
           (json['items'] as List<dynamic>?)
@@ -58,7 +48,7 @@ class OrderItem {
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
     return OrderItem(
-      name: json['product_name']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
       quantity: int.tryParse(json['quantity']?.toString() ?? '') ?? 0,
       price: double.tryParse(json['price']?.toString() ?? '0') ?? 0.0,
     );
@@ -66,7 +56,8 @@ class OrderItem {
 }
 
 class _OrdersListPageState extends State<OrdersListPage> {
-  final List<String> tabs = ['Pending', 'Ready for Pick Up', 'Picked Up'];
+  bool _isLoading = true;
+  final List<String> tabs = ['Pending', 'Ready for Pickup', 'Completed'];
   List<Order> pendingOrders = [];
   List<Order> readyOrders = [];
   List<Order> pickedUpOrders = [];
@@ -74,7 +65,41 @@ class _OrdersListPageState extends State<OrdersListPage> {
   @override
   void initState() {
     super.initState();
-    fetchOrderDetails();
+    _initializePendingTab();
+  }
+
+  Future<void> _initializePendingTab() async {
+    await _fetchPendingTab();
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _fetchPendingTab() async {
+    final token = await Token.getToken();
+    final response = await http.get(
+      Uri.parse('http://127.0.0.1:8000/api/order/pending'),
+      headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('HTTP ${response.statusCode}');
+    }
+
+    final decoded = jsonDecode(response.body);
+
+    if (decoded is Map<String, dynamic> && decoded['orders'] is List) {
+      final List<Order> pending =
+          (decoded['orders'] as List)
+              .map((orderJson) => Order.fromJson(orderJson))
+              .toList();
+
+      setState(() {
+        pendingOrders = pending;
+      });
+    } else {
+      throw Exception('Unexpected JSON format: $decoded');
+    }
   }
 
   Future<void> fetchOrderDetails() async {
@@ -173,16 +198,19 @@ class _OrdersListPageState extends State<OrdersListPage> {
           ),
         ),
         backgroundColor: const Color.fromARGB(255, 254, 207, 223),
-        body: TabBarView(
-          children: [
-            // Pending tab
-            _buildOrderList(pendingOrders, Colors.white),
-            // Ready to Pick Up tab
-            _buildOrderList(readyOrders, Colors.white),
-            // Picked Up tab
-            _buildOrderList(pickedUpOrders, Colors.white),
-          ],
-        ),
+        body:
+            _isLoading
+                ? Center(child: CircularProgressIndicator())
+                : TabBarView(
+                  children: [
+                    // Pending tab
+                    _buildOrderList(pendingOrders, Colors.white),
+                    // Ready to Pick Up tab
+                    _buildOrderList(readyOrders, Colors.white),
+                    // Picked Up tab
+                    _buildOrderList(pickedUpOrders, Colors.white),
+                  ],
+                ),
       ),
     );
   }
@@ -212,17 +240,8 @@ class _OrdersListPageState extends State<OrdersListPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top Section: Payment, Shop, Address, Pickup Time
                 Text(
                   'Order ID: ${order.orderId}',
-                  style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
-                    color: Colors.grey[700],
-                  ),
-                ),
-                Text(
-                  order.paymentMethod,
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.w500,
                     fontSize: 14,
@@ -245,29 +264,7 @@ class _OrdersListPageState extends State<OrdersListPage> {
                     color: Colors.grey[600],
                   ),
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  // Use row for label and value
-                  children: [
-                    Text(
-                      'Pick up time: ',
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        color: Colors.grey[800],
-                      ),
-                    ),
-                    Text(
-                      '${order.pickupDate}  ${order.pickupTime}',
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-
                 const Divider(height: 24, thickness: 1), // Thicker divider
-                // --- Order Summary Section ---
                 Text(
                   'Order summary',
                   style: GoogleFonts.poppins(
@@ -276,8 +273,6 @@ class _OrdersListPageState extends State<OrdersListPage> {
                   ),
                 ),
                 const SizedBox(height: 12),
-
-                // --- Scrollable Item List ---
                 ConstrainedBox(
                   constraints: BoxConstraints(
                     maxHeight: MediaQuery.of(context).size.height * 0.25,
