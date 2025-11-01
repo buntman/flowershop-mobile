@@ -17,14 +17,14 @@ class CartPage extends StatefulWidget {
 
 class CartItems {
   final int cartItemId;
-  final String imagePath;
+  final String image;
   final String name;
   int quantity;
   final double price;
 
   CartItems({
     required this.cartItemId,
-    required this.imagePath,
+    required this.image,
     required this.name,
     required this.quantity,
     required this.price,
@@ -33,7 +33,7 @@ class CartItems {
   factory CartItems.fromJson(Map<String, dynamic> json) {
     return CartItems(
       cartItemId: json['id'],
-      imagePath: json['image_name']?.toString() ?? '',
+      image: json['image_name']?.toString() ?? '',
       name: json['name']?.toString() ?? 'Unknown',
       quantity: int.tryParse(json['quantity']?.toString() ?? '') ?? 1,
       price: double.tryParse(json['price']?.toString() ?? '0') ?? 0.0,
@@ -285,7 +285,7 @@ class _CartPageState extends State<CartPage> {
                                         width: imageSize,
                                         height: imageSize,
                                         child: Image.network(
-                                          item.imagePath,
+                                          item.image,
                                           fit: BoxFit.cover,
                                         ),
                                       ),
