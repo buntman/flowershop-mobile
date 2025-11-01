@@ -12,6 +12,15 @@ class OrdersListPage extends StatefulWidget {
   State<OrdersListPage> createState() => _OrdersListPageState();
 }
 
+enum OrderStatus {
+  pending('pending'),
+  readyForPickup('ready_for_pickup'),
+  completed('completed');
+
+  final String value;
+  const OrderStatus(this.value);
+}
+
 class Order {
   final int orderId;
   final double totalPrice;
@@ -55,30 +64,54 @@ class OrderItem {
   }
 }
 
-class _OrdersListPageState extends State<OrdersListPage> {
-  bool _isLoading = true;
+class _OrdersListPageState extends State<OrdersListPage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   final List<String> tabs = ['Pending', 'Ready for Pickup', 'Completed'];
   List<Order> pendingOrders = [];
   List<Order> readyOrders = [];
-  List<Order> pickedUpOrders = [];
+  List<Order> completedOrders = [];
+  bool _isPendingLoading = true;
+  bool _isReadyLoading = true;
+  bool _isCompletedLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _initializePendingTab();
-  }
 
-  Future<void> _initializePendingTab() async {
-    await _fetchPendingTab();
-    setState(() {
-      _isLoading = false;
+    _tabController = TabController(length: tabs.length, vsync: this);
+
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        onTabChanged(_tabController.index);
+      }
     });
+    onTabChanged(0);
   }
 
-  Future<void> _fetchPendingTab() async {
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _fetchOrderDetails(OrderStatus status) async {
+    setState(() {
+      switch (status) {
+        case OrderStatus.pending:
+          _isPendingLoading = true;
+          break;
+        case OrderStatus.readyForPickup:
+          _isReadyLoading = true;
+          break;
+        case OrderStatus.completed:
+          _isCompletedLoading = true;
+          break;
+      }
+    });
     final token = await Token.getToken();
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/order/pending'),
+      Uri.parse('http://127.0.0.1:8000/api/order/${status.value}'),
       headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
     );
 
@@ -87,135 +120,110 @@ class _OrdersListPageState extends State<OrdersListPage> {
     }
 
     final decoded = jsonDecode(response.body);
-
-    if (decoded is Map<String, dynamic> && decoded['orders'] is List) {
-      final List<Order> pending =
-          (decoded['orders'] as List)
-              .map((orderJson) => Order.fromJson(orderJson))
-              .toList();
-
+    if (decoded is! Map<String, dynamic> || decoded['orders'] is! List) {
       setState(() {
-        pendingOrders = pending;
+        _isPendingLoading = _isReadyLoading = _isCompletedLoading = false;
       });
-    } else {
       throw Exception('Unexpected JSON format: $decoded');
     }
-  }
 
-  Future<void> fetchOrderDetails() async {
-    final token = await Token.getToken();
-    final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/order/details'),
-      headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
-    );
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+    final List<Order> orders =
+        (decoded['orders'] as List)
+            .map((orderJson) => Order.fromJson(orderJson))
+            .toList();
 
-      List<Order> pending = [];
-      List<Order> ready = [];
-      List<Order> pickedUp = [];
+    if (!mounted) return;
 
-      if (data is Map<String, dynamic>) {
-        final order = Order.fromJson(data);
-        final status = data['status'];
-        if (status == 'Pending') {
-          pending.add(order);
-        } else if (status == 'Ready for Pickup') {
-          ready.add(order);
-        } else if (status == 'Picked Up') {
-          pickedUp.add(order);
-        }
-      } else if (data is List) {
-        for (var orderJson in data) {
-          final order = Order.fromJson(orderJson);
-          final status = orderJson['status'];
-          if (status == 'Pending') {
-            pending.add(order);
-          } else if (status == 'Ready for Pickup') {
-            ready.add(order);
-          } else if (status == 'Picked Up') {
-            pickedUp.add(order);
-          }
-        }
+    setState(() {
+      switch (status) {
+        case OrderStatus.pending:
+          pendingOrders = orders;
+          _isPendingLoading = false;
+          break;
+        case OrderStatus.readyForPickup:
+          readyOrders = orders;
+          _isReadyLoading = false;
+          break;
+        case OrderStatus.completed:
+          completedOrders = orders;
+          _isCompletedLoading = false;
+          break;
       }
-
-      setState(() {
-        pendingOrders = pending;
-        readyOrders = ready;
-        pickedUpOrders = pickedUp;
-      });
-    }
+    });
   }
 
-  Future<void> updatePickedUpOrderStatus(Order order) async {
+  Future<void> onTabChanged(int index) async {
+    final status = OrderStatus.values[index];
+    if (status == OrderStatus.pending && pendingOrders.isNotEmpty)
+      return; //prevent unnecessary api calls
+    if (status == OrderStatus.readyForPickup && readyOrders.isNotEmpty) return;
+    if (status == OrderStatus.completed && completedOrders.isNotEmpty) return;
+
+    await _fetchOrderDetails(status);
+  }
+
+  Future<void> markOrderAsComplete(Order order) async {
     final token = await Token.getToken();
-    final response = await http.post(
-      Uri.parse('http://127.0.0.1:8000/api/order/status'),
-      headers: {
-        HttpHeaders.authorizationHeader: 'Bearer $token',
-        HttpHeaders.contentTypeHeader: 'application/json',
-      },
-      body: jsonEncode({"order_id": order.orderId}),
+    final response = await http.patch(
+      Uri.parse('http://127.0.0.1:8000/api/order/${order.orderId}'),
+      headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: tabs.length,
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 1,
-          shadowColor: Colors.grey.shade300,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          title: Text(
-            'Purchase History',
-            style: GoogleFonts.poppins(
-              color: Colors.black,
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          bottom: TabBar(
-            isScrollable: false,
-            labelColor: Colors.pink,
-            unselectedLabelColor: Colors.grey[700],
-            indicatorColor: Colors.pink,
-            indicatorWeight: 3.0, // Slightly thicker indicator
-            labelStyle: GoogleFonts.poppins(
-              fontWeight: FontWeight.w600,
-              fontSize: 12,
-            ),
-            unselectedLabelStyle: GoogleFonts.poppins(
-              fontWeight: FontWeight.w500,
-              fontSize: 12,
-            ),
-            tabs: tabs.map((t) => Tab(text: t)).toList(),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 1,
+        shadowColor: Colors.grey.shade300,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(
+          'Purchase History',
+          style: GoogleFonts.poppins(
+            color: Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        backgroundColor: const Color.fromARGB(255, 254, 207, 223),
-        body:
-            _isLoading
-                ? Center(child: CircularProgressIndicator())
-                : TabBarView(
-                  children: [
-                    // Pending tab
-                    _buildOrderList(pendingOrders, Colors.white),
-                    // Ready to Pick Up tab
-                    _buildOrderList(readyOrders, Colors.white),
-                    // Picked Up tab
-                    _buildOrderList(pickedUpOrders, Colors.white),
-                  ],
-                ),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: tabs.map((t) => Tab(text: t)).toList(),
+          isScrollable: false,
+          labelPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+          labelColor: Colors.pink,
+          unselectedLabelColor: Colors.grey[700],
+          indicatorColor: Colors.pink,
+          indicatorWeight: 3.0,
+          labelStyle: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+          ),
+          unselectedLabelStyle: GoogleFonts.poppins(
+            fontWeight: FontWeight.w500,
+            fontSize: 12,
+          ),
+        ),
+      ),
+      backgroundColor: const Color.fromARGB(255, 254, 207, 223),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildOrderList(pendingOrders, _isPendingLoading, Colors.white),
+          _buildOrderList(readyOrders, _isReadyLoading, Colors.white),
+          _buildOrderList(completedOrders, _isCompletedLoading, Colors.white),
+        ],
       ),
     );
   }
 
-  Widget _buildOrderList(List<Order> orders, Color cardColor) {
+  Widget _buildOrderList(List<Order> orders, bool isLoading, Color cardColor) {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
     if (orders.isEmpty) {
       return Center(
         child: Text(
@@ -246,22 +254,6 @@ class _OrdersListPageState extends State<OrdersListPage> {
                     fontWeight: FontWeight.w500,
                     fontSize: 14,
                     color: Colors.grey[700],
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "Rizza Flower Shop",
-                  style: GoogleFonts.poppins(
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "MWCW+588, Rizal St, Bacolod, 6100 Negros Occidental",
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    color: Colors.grey[600],
                   ),
                 ),
                 const Divider(height: 24, thickness: 1), // Thicker divider
@@ -360,7 +352,7 @@ class _OrdersListPageState extends State<OrdersListPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    if (order.status == 'Ready for Pickup')
+                    if (order.status == OrderStatus.readyForPickup.value)
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.pink,
@@ -373,11 +365,9 @@ class _OrdersListPageState extends State<OrdersListPage> {
                           ),
                         ),
                         onPressed: () async {
-                          await updatePickedUpOrderStatus(order);
+                          await markOrderAsComplete(order);
                           setState(() {
                             orders.remove(order);
-                            order.status = 'Picked Up';
-                            pickedUpOrders.add(order);
                           });
                         },
                         child: Text(
