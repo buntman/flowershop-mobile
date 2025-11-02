@@ -300,211 +300,269 @@ class _OrderPageState extends State<OrderPage> {
           _isLoading
               ? Center(child: CircularProgressIndicator())
               : Padding(
-                padding: EdgeInsets.all(20.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      constraints: BoxConstraints(minWidth: 600, minHeight: 50),
-                      padding: EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.person_outline,
-                            size: 20,
-                            color: Colors.grey[600],
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  user?.name ?? '',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  user?.contactNumber ?? '',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(padding: EdgeInsets.only(top: 10)),
-                    Container(
-                      padding: EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.storefront,
-                                color: Colors.pink,
-                                size: 22,
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // User info
+                            Container(
+                              constraints: const BoxConstraints(
+                                minWidth: 600,
+                                minHeight: 50,
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Rizza Flower Shop', //
-                                style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                ),
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey.shade300),
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                            ],
-                          ),
-                          SizedBox(
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: items.length,
-                              itemBuilder: (context, index) {
-                                var item = items[index];
-                                const double imageSize = 60; //
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 8.0,
-                                    horizontal: 12.0,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(
+                                    Icons.person_outline,
+                                    size: 22,
+                                    color: Color.fromRGBO(250, 34, 144, 1),
                                   ),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: SizedBox(
-                                          width: imageSize,
-                                          height: imageSize,
-                                          child: Image.network(
-                                            item.image,
-                                            fit: BoxFit.cover,
-                                            errorBuilder:
-                                                (
-                                                  context,
-                                                  error,
-                                                  stackTrace,
-                                                ) => Container(
-                                                  color: Colors.grey.shade200,
-                                                  child: const Icon(
-                                                    Icons.image_not_supported,
-                                                    color: Colors.grey,
-                                                  ),
-                                                ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          user?.name ?? '',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(width: 12),
-
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              item.name,
-                                              style: GoogleFonts.inter(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w400,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              '₱${item.subTotal.toStringAsFixed(2)}',
-                                              style: GoogleFonts.inter(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          user?.contactNumber ?? '',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                          ),
                                         ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey.shade300),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.storefront,
+                                        color: Colors.pink,
+                                        size: 22,
                                       ),
-
+                                      const SizedBox(width: 8),
                                       Text(
-                                        '${item.quantity}x',
+                                        'Rizza Flower Shop',
                                         style: GoogleFonts.inter(
-                                          fontSize: 13,
-                                          color: Colors.grey[600],
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black87,
                                         ),
                                       ),
                                     ],
                                   ),
-                                );
-                              },
+                                  const SizedBox(height: 8),
+                                  ListView.builder(
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemCount: items.length,
+                                    itemBuilder: (context, index) {
+                                      var item = items[index];
+                                      const double imageSize = 60;
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 8.0,
+                                          horizontal: 12.0,
+                                        ),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              child: SizedBox(
+                                                width: imageSize,
+                                                height: imageSize,
+                                                child: Image.network(
+                                                  item.image,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder:
+                                                      (
+                                                        context,
+                                                        error,
+                                                        stackTrace,
+                                                      ) => Container(
+                                                        color:
+                                                            Colors
+                                                                .grey
+                                                                .shade200,
+                                                        child: const Icon(
+                                                          Icons
+                                                              .image_not_supported,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      ),
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    item.name,
+                                                    style: GoogleFonts.inter(
+                                                      fontSize: 13,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    '₱${item.subTotal.toStringAsFixed(2)}',
+                                                    style: GoogleFonts.inter(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            Text(
+                                              '${item.quantity}x',
+                                              style: GoogleFonts.inter(
+                                                fontSize: 13,
+                                                color: Colors.grey[600],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(padding: EdgeInsets.only(top: 20)),
-                    Text(
-                      'Payment Method',
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
-                      ),
-                      title: Row(
-                        children: [
-                          Icon(
-                            Icons.payment,
-                            color: const Color.fromRGBO(250, 34, 144, 1),
-                            size: 22,
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            'Online',
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
+                            const SizedBox(height: 10),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey.shade300),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.payment,
+                                        color: Color.fromRGBO(250, 34, 144, 1),
+                                        size: 22,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'Payment Method',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  ListTile(
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                      vertical: 4,
+                                    ),
+                                    title: Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.payments_outlined,
+                                          color: Color.fromRGBO(
+                                            250,
+                                            34,
+                                            144,
+                                            1,
+                                          ),
+                                          size: 22,
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Text(
+                                          'Online',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    trailing: Radio(
+                                      activeColor: const Color.fromRGBO(
+                                        250,
+                                        34,
+                                        144,
+                                        1,
+                                      ),
+                                      fillColor: WidgetStateColor.resolveWith(
+                                        (states) => const Color.fromRGBO(
+                                          250,
+                                          34,
+                                          144,
+                                          1,
+                                        ),
+                                      ),
+                                      value: 'online',
+                                      groupValue: _paymentMethod,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _paymentMethod = value.toString();
+                                        });
+                                      },
+                                    ),
+                                    onTap: () {
+                                      setState(() {
+                                        _paymentMethod = 'online';
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      trailing: Radio(
-                        activeColor: const Color.fromRGBO(250, 34, 144, 1),
-                        fillColor: WidgetStateColor.resolveWith(
-                          (states) => const Color.fromRGBO(250, 34, 144, 1),
+                          ],
                         ),
-                        value: 'online',
-                        groupValue: _paymentMethod,
-                        onChanged: (value) {
-                          setState(() {
-                            _paymentMethod = value.toString();
-                          });
-                        },
                       ),
-                      onTap: () {
-                        setState(() {
-                          _paymentMethod = 'online';
-                        });
-                      },
                     ),
-                    Spacer(),
+                    const SizedBox(height: 30),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -542,11 +600,16 @@ class _OrderPageState extends State<OrderPage> {
                             }
                           },
                           style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                               vertical: 15,
                               horizontal: 40,
                             ),
-                            backgroundColor: Color.fromRGBO(250, 34, 144, 1),
+                            backgroundColor: const Color.fromRGBO(
+                              250,
+                              34,
+                              144,
+                              1,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(5),
                             ),

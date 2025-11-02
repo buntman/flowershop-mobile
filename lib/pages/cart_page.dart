@@ -290,7 +290,6 @@ class _CartPageState extends State<CartPage> {
                                         ),
                                       ),
                                     ),
-
                                     const SizedBox(width: 10),
                                     Expanded(
                                       child: Column(
@@ -319,10 +318,7 @@ class _CartPageState extends State<CartPage> {
                                               ),
                                             ],
                                           ),
-
                                           const SizedBox(height: 8),
-
-                                          // Quantity and buttons
                                           Row(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.spaceBetween,

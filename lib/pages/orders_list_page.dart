@@ -256,7 +256,7 @@ class _OrdersListPageState extends State<OrdersListPage>
                     color: Colors.grey[700],
                   ),
                 ),
-                const Divider(height: 24, thickness: 1), // Thicker divider
+                const Divider(height: 24, thickness: 1),
                 Text(
                   'Order summary',
                   style: GoogleFonts.poppins(
@@ -270,8 +270,7 @@ class _OrdersListPageState extends State<OrdersListPage>
                     maxHeight: MediaQuery.of(context).size.height * 0.25,
                   ),
                   child: ListView.builder(
-                    shrinkWrap:
-                        true, // Important for ListView inside Column/ConstrainedBox
+                    shrinkWrap: true,
                     itemCount: order.items.length,
                     itemBuilder: (ctx, itemIndex) {
                       final item = order.items[itemIndex];
@@ -284,9 +283,7 @@ class _OrdersListPageState extends State<OrdersListPage>
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Left side: Quantity and Name
                                 Flexible(
-                                  // Allow text wrapping
                                   child: Row(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -300,7 +297,6 @@ class _OrdersListPageState extends State<OrdersListPage>
                                         ),
                                       ),
                                       Expanded(
-                                        // Allow name to take space and wrap
                                         child: Text(
                                           item.name,
                                           style: GoogleFonts.poppins(
@@ -312,9 +308,8 @@ class _OrdersListPageState extends State<OrdersListPage>
                                   ),
                                 ),
                                 const SizedBox(width: 16),
-                                // Right side: Price
                                 Text(
-                                  '${item.price.toStringAsFixed(2)} PHP', // Ensure price is double
+                                  '${item.price.toStringAsFixed(2)} PHP',
                                   style: GoogleFonts.poppins(
                                     fontWeight: FontWeight.w500,
                                     fontSize: 14,
@@ -340,7 +335,7 @@ class _OrdersListPageState extends State<OrdersListPage>
                       ),
                     ),
                     Text(
-                      '${order.totalPrice.toStringAsFixed(2)} PHP', // Ensure total price is double
+                      '${order.totalPrice.toStringAsFixed(2)} PHP',
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
