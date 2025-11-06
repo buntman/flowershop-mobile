@@ -73,6 +73,17 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  Future<void> _logOut() async {
+    final token = await Token.getToken();
+    final response = await http.delete(
+      Uri.parse('http://127.0.0.1:8000/api/logout'),
+      headers: {
+        HttpHeaders.authorizationHeader: 'Bearer $token',
+        HttpHeaders.acceptHeader: 'application/json',
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -232,6 +243,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
               onPressed: () async {
+                await _logOut();
                 await Token.removeToken();
                 Navigator.pushAndRemoveUntil(
                   context,
