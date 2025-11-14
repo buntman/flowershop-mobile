@@ -23,12 +23,14 @@ enum OrderStatus {
 
 class Order {
   final int orderId;
+  final String orderNumber;
   final double totalPrice;
   String status;
   final List<OrderItem> items;
 
   Order({
     required this.orderId,
+    required this.orderNumber,
     required this.totalPrice,
     required this.status,
     required this.items,
@@ -37,6 +39,7 @@ class Order {
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
       orderId: json['id'],
+      orderNumber: json['order_number'],
       totalPrice: double.tryParse(json['total']?.toString() ?? '0') ?? 0.0,
       status: json['status']?.toString() ?? '',
       items:
@@ -249,7 +252,7 @@ class _OrdersListPageState extends State<OrdersListPage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Order ID: ${order.orderId}',
+                  'Order # ${order.orderNumber}',
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.w500,
                     fontSize: 14,
