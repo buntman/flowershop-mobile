@@ -69,10 +69,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           backgroundColor: Colors.green,
         ),
       );
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => ProfilePage()),
-      );
+      Navigator.pop(context);
     } else if (response.statusCode == 422) {
       final data = jsonDecode(response.body);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -103,13 +100,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed:
-              () => {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ProfilePage()),
-                ),
-              },
+          onPressed: () => {Navigator.pop(context)},
         ),
       ),
       backgroundColor: Colors.white,
